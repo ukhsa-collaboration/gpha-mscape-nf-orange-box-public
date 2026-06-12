@@ -1,0 +1,243 @@
+#!/usr/bin/env nextflow
+
+process PORTAL {
+    /*
+        Process:
+            - Checks all Orange box modules have completed before triggering execution of Onyx/S3 funnel upload processes.
+            - Uses ${climb_id}.${orange_box_module}.analysis_fields.json files as data dependencies: does not complete
+              until all have been successfully created.
+            - Purpose is to avoid having to add every ${climb_id}.${OBM}.analysis_fields.json file as a data dependency to
+              each funnel process call to ensure the funnel processes only run once modules have completed i.e. tidier code.
+            - E.g. adding a 10th module would require adding a new data dependency to 9 funnel processes; each would now now
+              have 10 data dependency inputs.
+            - This approach means only having to update dependencies within this single process each time a new module is
+              added to the Orange Box.
+
+        Inputs:
+            - Requires climb_id, and explicit filenames of Orange Box module analysis_fields.json output files.
+
+        Outputs:
+            - Emits a signal ('true') to trigger execution of downstream Onyx/S3 funnel processes.
+    */
+
+    container 'ghcr.io/ukhsa-collaboration/gpha-mscape-onyx-analysis-helper:0.3.1'
+    cpus 1
+    memory '1GB'
+    tag "Pulling ${climb_id} module analysis_field JSONs through Portal"
+    publishDir "$params.outdir", mode: "copy"
+
+    input:
+    val climb_id
+
+    // We want to be as explicit as possible here - each module must create an analysis_fields.json file on completion.
+    // N.b. Need to ensure analysis_fields.json filename matches what's inside workflows/orange_box.nf.
+    path "${climb_id}.QC.analysis_fields.json"
+
+    // fake claspar inputs - real ones will be similar if not identical
+    path "${climb_id}.claspar-viralaligner.analysis_fields.json"
+    path "${climb_id}.claspar-krakenbacteria.analysis_fields.json"
+    path "${climb_id}.claspar-sylph.analysis_fields.json"
+
+    output:
+    val true, emit: ready_to_go
+
+    script:
+    """
+    echo "PORTAL: All analysis_fields.json files collected for Orange Box modules."
+    """
+}
+
+
+process FIRST_ONYX_WRITE {
+    /*
+        Process:
+	    - Pushes Orange box analysis results to Onyx and S3 to prepare for publishing an Onyx record
+        Inputs:
+            - Requires climb_id, nickname of Orange Box module (e.g. QC), outputs from Orange Box modules and
+              ready_to_go signal from PORTAL process: this triggers the process to run only on successful completion
+              of *all* Orange Box modules.
+
+        Outputs:
+            - Analysis_id files for each module in the form ${climb_id}.${orange_box_module}.analysis_id.  The subesquent
+              publish step will then use these with skeleton OnyxAnalysis helper objects to publish each analysis.
+    */
+    container 'ghcr.io/ukhsa-collaboration/gpha-mscape-onyx-analysis-helper:0.3.1'
+    cpus 1
+    memory '1GB'
+    tag "Funnelling ${climb_id} Orange Box analyses: FirstWriteToOnyx"
+    publishDir "$params.outdir/funnel", mode: "copy"
+
+    errorStrategy { sleep(Math.pow(2, task.attempt) * 200 as long); return 'retry' }
+    maxRetries 5
+
+    input:
+    val climb_id
+    val orange_box_module
+    path "${climb_id}.${orange_box_module}.analysis_fields.json"
+    val server
+    val bucket
+    val ready_to_go
+
+    output:
+    path "${climb_id}.${orange_box_module}.temp.analysis_id", emit: temp_analysis_id_file
+    path "${climb_id}.${orange_box_module}.FirstWriteToOnyx.Orange_Box_Onyx_S3_transfer_log.txt", emit: funnel_logs
+
+    script:
+    """
+    echo '# # # # # starting funnel task: FirstWriteToOnyx'
+    orange_box_onyx_s3.py    --climb_id $climb_id  \
+    --json ${climb_id}.${orange_box_module}.analysis_fields.json  --server $server  \
+    --bucket $bucket  --orange_box_module $orange_box_module --orange_box_version ${workflow.manifest.version}\
+    --task FirstWriteToOnyx
+    # next lines to simulate completion of process so can test whole pipeline
+    #echo "a_id_87654321" > ${climb_id}.${orange_box_module}.temp.analysis_id
+    #echo "blah" > ${climb_id}.${orange_box_module}.FirstWriteToOnyx.Orange_Box_Onyx_S3_transfer_log.txt
+    echo '# # # # # finished funnel task: FirstWriteToOnyx'
+    """
+}
+
+
+process S3_UPLOAD {
+    /*
+        Process:
+	    - Pushes Orange box analysis results to Onyx and S3 to prepare for publishing an Onyx record
+        Inputs:
+            - Requires climb_id, nickname of Orange Box module (e.g. QC), and outputs from Orange Box modules.
+              N.b. Will be run on successful completion of all modules.
+
+        Outputs:
+            - Analysis_id files for each module in the form ${climb_id}.${orange_box_module}.analysis_id.  The subesquent
+              publish step will then use these with skeleton OnyxAnalysis helper objects to publish each analysis.
+    */
+    container 'ghcr.io/ukhsa-collaboration/gpha-mscape-onyx-analysis-helper:0.6.0'
+    cpus 1
+    memory '1GB'
+    tag "Funnelling ${climb_id} Orange Box analyses: S3Upload"
+    publishDir "$params.outdir/funnel", mode: "copy"
+
+    errorStrategy { sleep(Math.pow(2, task.attempt) * 200 as long); return 'retry' }
+    maxRetries 5
+
+    input:
+    val climb_id
+    val orange_box_module
+    val server
+    val bucket
+    path "${climb_id}.${orange_box_module}.temp.analysis_id"
+    path upload_files
+    // qc-specific...  path "${climb_id}_qc_results.json"
+
+    output:
+    path "${climb_id}.${orange_box_module}.s3_location.json", emit: s3_location_json
+    path "${climb_id}.${orange_box_module}.S3Upload.Orange_Box_Onyx_S3_transfer_log.txt", emit: funnel_logs
+
+    script:
+    """
+    echo '# # # # # starting funnel task: S3Upload'
+    echo '# # # # # parsing upload_files channel into CSV argument for orange_box_onyx_s3.py'
+    COMMA_SEP_S3_FILES=`echo $upload_files | sed -r {'s/\s+/,/g'}`
+    echo '# # # # #   --files_to_upload' \$COMMA_SEP_S3_FILES
+    orange_box_onyx_s3.py    --climb_id $climb_id  \
+    --json ${climb_id}.${orange_box_module}.analysis_fields.json  --server $server  \
+    --bucket $bucket  --orange_box_module $orange_box_module  --task S3Upload \
+    --files_to_upload \$COMMA_SEP_S3_FILES
+    ## qc-specific...    --files_to_upload ${climb_id}_qc_results.json
+    # next lines to simulate completion of process so can test whole pipeline
+    #echo '{"identifiers": []}' > ${climb_id}.${orange_box_module}.s3_location.json
+    #echo 'blah2' >> ${climb_id}.${orange_box_module}.S3Upload.Orange_Box_Onyx_S3_transfer_log.txt
+    echo '# # # # # finished funnel task: S3Upload'
+    """
+}
+
+
+process FINAL_ONYX_UPDATE {
+    /*
+        Process:
+	    - Pushes Orange box analysis results to Onyx and S3 to prepare for publishing an Onyx record
+        Inputs:
+            - Requires climb_id, nickname of Orange Box module (e.g. QC), and outputs from Orange Box modules.
+              N.b. Will be run on successful completion of all modules.
+
+        Outputs:
+            - Analysis_id files for each module in the form ${climb_id}.${orange_box_module}.analysis_id.  The subesquent
+              publish step will then use these with skeleton OnyxAnalysis helper objects to publish each analysis.
+    */
+    container 'ghcr.io/ukhsa-collaboration/gpha-mscape-onyx-analysis-helper:0.3.1'
+    cpus 1
+    memory '1GB'
+    tag "Funnelling ${climb_id} Orange Box analyses: FinalOnyxUpdate"
+    publishDir "$params.outdir/funnel", mode: "copy"
+
+    errorStrategy { sleep(Math.pow(2, task.attempt) * 200 as long); return 'retry' }
+    maxRetries 5
+
+    input:
+    val climb_id
+    val orange_box_module
+    path "${climb_id}_qc_results.json"
+    val server
+    val bucket
+    path "${climb_id}.${orange_box_module}.temp.analysis_id"
+    path "${climb_id}.${orange_box_module}.s3_location.json"
+
+    output:
+    path "${climb_id}.${orange_box_module}.analysis_id", emit: analysis_id_file
+    path "${climb_id}.${orange_box_module}.FinalOnyxUpdate.Orange_Box_Onyx_S3_transfer_log.txt", emit: funnel_logs
+
+    script:
+    """
+    echo '# # # # # starting funnel task: FinalOnyxUpdate'
+    orange_box_onyx_s3.py    --climb_id $climb_id  \
+    --json ${climb_id}.${orange_box_module}.s3_location.json  --server $server  \
+    --bucket $bucket  --orange_box_module $orange_box_module  --task FinalOnyxUpdate \
+    # next lines to simulate completion of process so can test whole pipeline
+    #echo 'a_id_87654321' > ${climb_id}.${orange_box_module}.analysis_id
+    #echo 'blah3' >> ${climb_id}.${orange_box_module}.FinalOnyxUpdate.Orange_Box_Onyx_S3_transfer_log.txt
+    echo '# # # # # finished funnel task: FinalOnyxUpdate'
+    """
+}
+
+
+process PUBLISH_ONYX {
+    /*
+        Process:
+	    - Publishes an Onyx record
+        Inputs:
+            - Requires climb_id, analysis_id_file (containing analysis_id) and server {synthscape, mscape}
+              N.b. Will be run when all modules have successfully completed their Onyx/S3 transfers.
+
+        Outputs:
+            - None, bar a log file.
+    */
+    container 'ghcr.io/ukhsa-collaboration/gpha-mscape-onyx-analysis-helper:0.3.1'
+    cpus 1
+    memory '1GB'
+    tag "Funnelling ${climb_id} Orange Box analyses: Publish to Onyx"
+    publishDir "$params.outdir/funnel", mode: "copy"
+
+    errorStrategy { sleep(Math.pow(2, task.attempt) * 200 as long); return 'retry' }
+    maxRetries 5
+
+    input:
+    val climb_id
+    val server
+    path "${climb_id}.QC.analysis_id"
+
+    // fake claspar inputs - real ones will be similar - presumably *.CLASPAR* rather than *.FAKE_CLASPAR*
+    path "${climb_id}.FAKE_CLASPAR_VA.analysis_id"
+    path "${climb_id}.FAKE_CLASPAR_KRAKEN.analysis_id"
+    path "${climb_id}.FAKE_CLASPAR_SYLPH.analysis_id"
+
+    output:
+    path "${climb_id}.Orange_Box_Onyx_publish_log.txt", emit: publish_logs
+
+    script:
+    """
+    echo '# # # # # starting funnel publish step'
+    orange_box_publish.py    --climb_id $climb_id  --server $server  \
+    --analysis_id_files ${climb_id}.QC.analysis_id,${climb_id}.FAKE_CLASPAR_VA.analysis_id,${climb_id}.FAKE_CLASPAR_KRAKEN.analysis_id,${climb_id}.FAKE_CLASPAR_SYLPH.analysis_id
+    # next lines to simulate completion of process so can test whole pipeline
+    #echo 'blahpub' >> ${climb_id}.Orange_Box_Onyx_publish_log.txt
+    #echo '# # # # # finished funnel publish step'
+    """
+}

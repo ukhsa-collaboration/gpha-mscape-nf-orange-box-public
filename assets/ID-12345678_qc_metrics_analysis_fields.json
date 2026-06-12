@@ -1,0 +1,15 @@
+{
+    "identifiers": [],
+    "name": "ukhsa-classifier-qc-metrics",
+    "description": "This is an analysis to generate QC statistics for individual samples",
+    "analysis_date": "2000-01-01",
+    "pipeline_name": "mscape-sample-qc",
+    "pipeline_version": "0.2.0",
+    "pipeline_url": "https://github.com/ukhsa-collaboration/repo",
+    "methods": "{\"onyx_versions_hash\": \"ABC123\", \"versions\": [{\"name\": \"classifier_version\", \"version\": \"1.0.0\"}, {\"name\": \"classifier_db_date\", \"version\": \"1970-01-01\"}, {\"name\": \"ncbi_taxonomy_date\", \"version\": \"1970-01-01\"}, {\"name\": \"scylla_version\", \"version\": \"1.0.0\"}, {\"name\": \"sylph_db_version\", \"version\": \"1.0.0\"}, {\"name\": \"alignment_db_version\", \"version\": \"1.0.0\"}, {\"name\": \"qc_metrics_version\", \"version\": \"0.2.0\"}], \"thresholds\": {\"total_reads\": {\"pass\": 1, \"fail\": 2}}}",
+    "result": "QC results: pass",
+    "result_metrics": "{\"total_reads\": 10}",
+    "synthscape_records": [
+        "ID-12345678"
+    ]
+}
