@@ -492,14 +492,12 @@ def main():
     if args.task == "FirstWriteToOnyx":
         # add in orange box version here
         logging.debug("Adding orange box version %s", args.orange_box_version)
-        updated_json, task_fail = add_orange_box_version_to_json(
-            args.json, args.orange_box_version
-        )
+        task_fail = add_orange_box_version_to_json(args.json, args.orange_box_version)
         # If adding the version didn't fail, continue to first write, else jump
         # to bottom where task_fail is handled.
         if not task_fail:
             task_fail = first_write_to_onyx(
-                args.climb_id, updated_json, args.server, args.orange_box_module
+                args.climb_id, args.json, args.server, args.orange_box_module
             )
 
     elif args.task == "S3Upload":
