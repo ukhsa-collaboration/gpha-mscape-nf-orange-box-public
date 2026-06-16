@@ -67,6 +67,7 @@ Outputs:
 import argparse
 import logging
 import sys
+from pathlib import Path
 
 from onyx_analysis_helper import onyx_analysis_helper_functions as oa
 from onyx_analysis_helper import s3_functions as s3f
@@ -83,7 +84,9 @@ def get_args():
         """,
     )
     parser.add_argument("--climb_id", "-c", type=str, required=True, help="Climb ID")
-    parser.add_argument("--json", "-j", type=str, required=True, help="Onyx Analysis JSON file")
+    parser.add_argument(
+        "--json", "-j", type=Path, required=True, help="Onyx Analysis JSON file"
+    )
     parser.add_argument(
         "--server",
         "-s",
@@ -93,9 +96,19 @@ def get_args():
         help="Specify server code is being run on",
     )
     parser.add_argument(
-        "--bucket", "-b", type=str, required=True, help="Bucket name (n.b. must not include '/' characters)"
+        "--bucket",
+        "-b",
+        type=str,
+        required=True,
+        help="Bucket name (n.b. must not include '/' characters)",
     )
-    parser.add_argument("--orange_box_module", "-m", type=str, required=True, help="Orange Box module name")
+    parser.add_argument(
+        "--orange_box_module",
+        "-m",
+        type=str,
+        required=True,
+        help="Orange Box module name",
+    )
     parser.add_argument(
         "--task",
         "-t",
@@ -104,9 +117,19 @@ def get_args():
         help="Specify task to run e.g. FirstWriteToOnyx, S3Upload, FinalOnyxUpdate",
     )
     parser.add_argument(
-        "--files_to_upload", "-f", type=str, required=False, help="Comma-separated list of files to upload to S3"
+        "--files_to_upload",
+        "-f",
+        type=str,
+        required=False,
+        help="Comma-separated list of files to upload to S3",
     )
-    parser.add_argument("--orange_box_version", "-v", type=str, required=False, help="Orange Box version as string.")
+    parser.add_argument(
+        "--orange_box_version",
+        "-v",
+        type=str,
+        required=False,
+        help="Orange Box version as string.",
+    )
 
     return parser.parse_args()
 
@@ -127,14 +150,18 @@ def set_up_logger(stdout_file):
     return logger
 
 
-def add_orange_box_version_to_json(json, orange_box_version) -> int:
+def add_orange_box_version_to_json(json: Path, orange_box_version: str) -> int:
     """
-    Read in analysis table json, add in the orange box version, overwrite the json.
+    Read in analysis table json, add in the orange box version, write new json, return exitcode and
+    path.
     This leaves a papertrail of changes rather than change and immediately pushing to onyx.
 
-    climb_id - str - sample id
-    json - path/str analysis table json, output from the module to be uploaded to Onyx
-    orange_box_version - str, orange box version, from args
+    Arguments:
+        json (Path) - path to analysis table json
+        orange_box_version (str) - orange box version
+
+    Returns:
+        exitcode (int) - 1 if fails, 0 if successfully adds version to json.
     """
 
     # Load in Onyx analysis JSON file
@@ -143,15 +170,24 @@ def add_orange_box_version_to_json(json, orange_box_version) -> int:
 
     onyx_analysis.read_analysis_from_json(json)
 
+    # Check if the version is present (happens if nextflow crash on first write.):
+    versions_present = set(
+        [(ver["name"], ver["version"]) for ver in onyx_analysis.methods["versions"]]
+    )
+
+    if ("orange_box_version", orange_box_version) in versions_present:
+        logging.debug("Orange box version %s already in json.", orange_box_version)
+        return exitcode
+
     # Add the orange box version and a versions hash to the methods in the analysis object:
     add_version_check = onyx_analysis.add_versions_to_methods(
-        tool_versions={"orange_box_version": orange_box_version}, include_versions_hash=False
+        tool_versions={"orange_box_version": orange_box_version},
+        include_versions_hash=False,
     )
 
     # Add in check that adding orange box version and has was successful else exit.
     if add_version_check:
-        logging.error("Could not add Orange Box version or hash to methods in analysis table.")
-        exitcode = 1
+        logging.error("Could not add Orange Box version to methods in analysis table.")
         return exitcode
 
     onyx_analysis.write_analysis_to_json(json)
@@ -194,7 +230,9 @@ def read_analysis_id_from_file(analysis_id_file):
                 analysis_id = lines[0]
             else:
                 logging.error(
-                    "Analysis_id_file should contain 1 line: %s contained %s lines", analysis_id_file, len(lines)
+                    "Analysis_id_file should contain 1 line: %s contained %s lines",
+                    analysis_id_file,
+                    len(lines),
                 )
                 exitcode = 1
                 return None, exitcode
@@ -214,17 +252,25 @@ def check_onyx_json(onyx_analysis, publish_analysis):
     check_status_list = onyx_analysis.check_analysis_object(publish_analysis=False)
     """
     onyx_fail = 0
-    check_status_list = onyx_analysis.check_analysis_object(publish_analysis=publish_analysis)
+    check_status_list = onyx_analysis.check_analysis_object(
+        publish_analysis=publish_analysis
+    )
     if len(check_status_list) == 2:
         if check_status_list[0]:
-            logging.error("Missing >=1 required fields in Onyx analysis object: check log for details")
+            logging.error(
+                "Missing >=1 required fields in Onyx analysis object: check log for details"
+            )
         if check_status_list[1]:
-            logging.error("Invalid attribute in Onyx analysis object: check log for details")
+            logging.error(
+                "Invalid attribute in Onyx analysis object: check log for details"
+            )
         if any(status for status in check_status_list):
             onyx_fail = 1
     else:
         # To catch the unlikely event that the Onyx helper function has failed to generate a list of two statuses for missing and/or invalid attributes.
-        logging.error("Onyx helper function check_analysis.object() failed to correctly generate status list")
+        logging.error(
+            "Onyx helper function check_analysis.object() failed to correctly generate status list"
+        )
         onyx_fail = 1
 
     return (check_status_list, onyx_fail)
@@ -258,7 +304,10 @@ def first_write_to_onyx(climb_id, json, server, orange_box_module):
     try:
         analysis_id = analysis_id_json["analysis_id"]
     except:
-        logging.error("Unable to extract analysis_id from JSON returned from Onyx: %s", analysis_id_json)
+        logging.error(
+            "Unable to extract analysis_id from JSON returned from Onyx: %s",
+            analysis_id_json,
+        )
         exitcode = 1
         return exitcode
 
@@ -274,7 +323,9 @@ def s3_upload(climb_id, analysis_id_file, bucket, orange_box_module, files_to_up
     # Read analysis_id from temporary analysis_id_file
     analysis_id, exitcode = read_analysis_id_from_file(analysis_id_file)
     if exitcode != 0:
-        logging.error("Couldn't read analysis_id from analysis_id file: %s", analysis_id_file)
+        logging.error(
+            "Couldn't read analysis_id from analysis_id file: %s", analysis_id_file
+        )
         return exitcode
 
     s3_file_list = list()
@@ -285,9 +336,14 @@ def s3_upload(climb_id, analysis_id_file, bucket, orange_box_module, files_to_up
     for file in local_file_list:
         try:
             # N.b. not sure we actually need to make s3_key?
-            s3_key = s3f._make_s3_key_name(analysis_id=analysis_id, file_for_upload=file)
+            s3_key = s3f._make_s3_key_name(
+                analysis_id=analysis_id, file_for_upload=file
+            )
             s3_uri, exitcode = s3f.upload_file_to_s3(
-                analysis_id=analysis_id, bucket=bucket, file_for_upload=file, s3_client=s3_client
+                analysis_id=analysis_id,
+                bucket=bucket,
+                file_for_upload=file,
+                s3_client=s3_client,
             )
             s3_file_list.append(s3_uri)
         except:
@@ -360,7 +416,9 @@ def final_onyx_update(
     # Read in analysis_id from analysis_id_file
     analysis_id, exitcode = read_analysis_id_from_file(analysis_id_file)
     if exitcode != 0:
-        logging.error("Couldn't read analysis_id from analysis_id file: %s", analysis_id_file)
+        logging.error(
+            "Couldn't read analysis_id from analysis_id file: %s", analysis_id_file
+        )
         return exitcode
 
     onyx_analysis = oa.OnyxAnalysis()
@@ -380,7 +438,11 @@ def final_onyx_update(
         server, analysis_id=analysis_id, dryrun=False, publish_analysis=False
     )
     if exitcode != 0:
-        logging.error("Couldn't update Onyx with S3 location for analysis_id: %s using server: %s", analysis_id, server)
+        logging.error(
+            "Couldn't update Onyx with S3 location for analysis_id: %s using server: %s",
+            analysis_id,
+            server,
+        )
         return exitcode
 
     #        try:
@@ -429,17 +491,34 @@ def main():
     task_fail = 0
     if args.task == "FirstWriteToOnyx":
         # add in orange box version here
-        add_orange_box_version_to_json(args.json, args.orange_box_version)
-        task_fail = first_write_to_onyx(args.climb_id, args.json, args.server, args.orange_box_module)
+        logging.debug("Adding orange box version %s", args.orange_box_version)
+        updated_json, task_fail = add_orange_box_version_to_json(
+            args.json, args.orange_box_version
+        )
+        # If adding the version didn't fail, continue to first write, else jump
+        # to bottom where task_fail is handled.
+        if not task_fail:
+            task_fail = first_write_to_onyx(
+                args.climb_id, updated_json, args.server, args.orange_box_module
+            )
 
     elif args.task == "S3Upload":
         task_fail = s3_upload(
-            args.climb_id, analysis_id_file, args.bucket, args.orange_box_module, args.files_to_upload
+            args.climb_id,
+            analysis_id_file,
+            args.bucket,
+            args.orange_box_module,
+            args.files_to_upload,
         )
 
     elif args.task == "FinalOnyxUpdate":
+        updated_json = Path(args.json.stem + "updated.json")
         task_fail = final_onyx_update(
-            args.climb_id, args.json, analysis_id_file, args.server, args.orange_box_module
+            args.climb_id,
+            updated_json,
+            analysis_id_file,
+            args.server,
+            args.orange_box_module,
         )
 
     else:
