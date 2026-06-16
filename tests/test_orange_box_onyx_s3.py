@@ -1,5 +1,6 @@
 # some_file.py
 import json
+import logging
 import shutil
 import sys
 from pathlib import Path
@@ -44,3 +45,17 @@ def test_add_orange_box_version_to_json(test_json, tmp_path):
     assert (
         len(versions_dict.keys()) == 8
     )  # make sure the versions hasn't been overwritten
+
+
+def test_add_orange_box_version_to_json_already_there(tmp_path, caplog):
+    """Check that if the orange box version is already there, that it skips."""
+    caplog.set_level(logging.DEBUG)
+    json_with_version = Path(
+        asset_path
+        / "ID-12345678.claspar-krakenbacteria.analysis_fields_with_version.json"
+    )
+    exitcode = orange_box_onyx_s3.add_orange_box_version_to_json(
+        json_with_version, "1.0.0"
+    )
+    assert exitcode == 0
+    assert "Orange box version 1.0.0 already in json" in caplog.text
