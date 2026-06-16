@@ -54,8 +54,6 @@ def test_add_orange_box_version_to_json_already_there(tmp_path, caplog):
         asset_path
         / "ID-12345678.claspar-krakenbacteria.analysis_fields_with_version.json"
     )
-    exitcode = orange_box_onyx_s3.add_orange_box_version_to_json(
-        json_with_version, "1.0.0"
-    )
-    assert exitcode == 0
+    orange_box_onyx_s3.add_orange_box_version_to_json(json_with_version, "1.0.0")
+
     assert "Orange box version 1.0.0 already in json" in caplog.text

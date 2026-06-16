@@ -150,7 +150,7 @@ def set_up_logger(stdout_file):
     return logger
 
 
-def add_orange_box_version_to_json(json: Path, orange_box_version: str) -> int:
+def add_orange_box_version_to_json(json: Path, orange_box_version: str) -> None:
     """
     Read in analysis table json, add in the orange box version, write new json, return exitcode and
     path.
@@ -159,13 +159,9 @@ def add_orange_box_version_to_json(json: Path, orange_box_version: str) -> int:
     Arguments:
         json (Path) - path to analysis table json
         orange_box_version (str) - orange box version
-
-    Returns:
-        exitcode (int) - 1 if fails, 0 if successfully adds version to json.
     """
 
     # Load in Onyx analysis JSON file
-    exitcode = 0
     onyx_analysis = oa.OnyxAnalysis()
 
     onyx_analysis.read_analysis_from_json(json)
@@ -177,21 +173,21 @@ def add_orange_box_version_to_json(json: Path, orange_box_version: str) -> int:
 
     if ("orange_box_version", orange_box_version) in versions_present:
         logging.debug("Orange box version %s already in json.", orange_box_version)
-        return exitcode
+        return
 
     # Add the orange box version and a versions hash to the methods in the analysis object:
-    add_version_check = onyx_analysis.add_versions_to_methods(
+    add_version_fail: bool = onyx_analysis.add_versions_to_methods(
         tool_versions={"orange_box_version": orange_box_version},
         include_versions_hash=False,
     )
 
     # Add in check that adding orange box version and has was successful else exit.
-    if add_version_check:
-        logging.error("Could not add Orange Box version to methods in analysis table.")
-        return exitcode
+    if add_version_fail:
+        raise RuntimeError(
+            "Could not add Orange Box version to methods in analysis table."
+        )
 
     onyx_analysis.write_analysis_to_json(json)
-    return exitcode
 
 
 ### REUSABLE READ/WRITE ANALYSIS_ID FILE FUNCTIONS
@@ -488,17 +484,18 @@ def main():
     analysis_id_file = f"{args.climb_id}.{args.orange_box_module}.temp.analysis_id"
 
     # Identify task to run:
-    task_fail = 0
+    task_fail = 0  # not failing
     if args.task == "FirstWriteToOnyx":
         # add in orange box version here
         logging.debug("Adding orange box version %s", args.orange_box_version)
-        task_fail = add_orange_box_version_to_json(args.json, args.orange_box_version)
-        # If adding the version didn't fail, continue to first write, else jump
-        # to bottom where task_fail is handled.
-        if not task_fail:
-            task_fail = first_write_to_onyx(
-                args.climb_id, args.json, args.server, args.orange_box_module
-            )
+        try:
+            add_orange_box_version_to_json(args.json, args.orange_box_version)
+        except RuntimeError:
+            return 1
+
+        task_fail = first_write_to_onyx(
+            args.climb_id, args.json, args.server, args.orange_box_module
+        )
 
     elif args.task == "S3Upload":
         task_fail = s3_upload(
@@ -510,10 +507,9 @@ def main():
         )
 
     elif args.task == "FinalOnyxUpdate":
-        updated_json = Path(args.json.stem + "updated.json")
         task_fail = final_onyx_update(
             args.climb_id,
-            updated_json,
+            args.json,
             analysis_id_file,
             args.server,
             args.orange_box_module,
