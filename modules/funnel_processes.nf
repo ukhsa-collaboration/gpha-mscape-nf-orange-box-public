@@ -20,7 +20,7 @@ process PORTAL {
             - Emits a signal ('true') to trigger execution of downstream Onyx/S3 funnel processes.
     */
 
-    container 'ghcr.io/ukhsa-collaboration/gpha-mscape-onyx-analysis-helper:0.6.0'
+    container 'ghcr.io/ukhsa-collaboration/gpha-mscape-onyx-analysis-helper:0.6.1'
     cpus 1
     memory '1GB'
     tag "Pulling ${climb_id} module analysis_field JSONs through Portal"
@@ -61,7 +61,7 @@ process FIRST_ONYX_WRITE {
             - Analysis_id files for each module in the form ${climb_id}.${orange_box_module}.analysis_id.  The subesquent
               publish step will then use these with skeleton OnyxAnalysis helper objects to publish each analysis.
     */
-    container 'ghcr.io/ukhsa-collaboration/gpha-mscape-onyx-analysis-helper:0.6.0'
+    container 'ghcr.io/ukhsa-collaboration/gpha-mscape-onyx-analysis-helper:0.6.1'
     cpus 1
     memory '1GB'
     tag "Funnelling ${climb_id} Orange Box analyses: FirstWriteToOnyx"
@@ -109,7 +109,7 @@ process S3_UPLOAD {
             - Analysis_id files for each module in the form ${climb_id}.${orange_box_module}.analysis_id.  The subesquent
               publish step will then use these with skeleton OnyxAnalysis helper objects to publish each analysis.
     */
-    container 'ghcr.io/ukhsa-collaboration/gpha-mscape-onyx-analysis-helper:0.6.0'
+    container 'ghcr.io/ukhsa-collaboration/gpha-mscape-onyx-analysis-helper:0.6.1'
     cpus 1
     memory '1GB'
     tag "Funnelling ${climb_id} Orange Box analyses: S3Upload"
@@ -162,7 +162,7 @@ process FINAL_ONYX_UPDATE {
             - Analysis_id files for each module in the form ${climb_id}.${orange_box_module}.analysis_id.  The subesquent
               publish step will then use these with skeleton OnyxAnalysis helper objects to publish each analysis.
     */
-    container 'ghcr.io/ukhsa-collaboration/gpha-mscape-onyx-analysis-helper:0.6.0'
+    container 'ghcr.io/ukhsa-collaboration/gpha-mscape-onyx-analysis-helper:0.6.1'
     cpus 1
     memory '1GB'
     tag "Funnelling ${climb_id} Orange Box analyses: FinalOnyxUpdate"
@@ -209,7 +209,7 @@ process PUBLISH_ONYX {
         Outputs:
             - None, bar a log file.
     */
-    container 'ghcr.io/ukhsa-collaboration/gpha-mscape-onyx-analysis-helper:0.6.0'
+    container 'ghcr.io/ukhsa-collaboration/gpha-mscape-onyx-analysis-helper:0.6.1'
     cpus 1
     memory '1GB'
     tag "Funnelling ${climb_id} Orange Box analyses: Publish to Onyx"
