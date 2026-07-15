@@ -15,7 +15,7 @@ process CLASPAR {
             - 3 upload_files_* channels: for viral aligner, kraken-bacteria (this is a tuple of two files) and sylph results files to be uploaded to S3.
             - 3 analysis_json_* channels for viral_aligner, kraken-bacteria and sylph analyses to be added to Onyx.
     */
-    container 'ghcr.io/ukhsa-collaboration/gpha-mscape-orangebox-claspar@sha256:0622ffefd46cdb975a967f6d92a047f57f8860ca8dec6e9c03ee4d58986c89a7'
+    container 'ghcr.io/ukhsa-collaboration/gpha-mscape-orangebox-claspar:v2.1.1
     cpus 1
     memory '2GB'
     tag "${climb_id}"
