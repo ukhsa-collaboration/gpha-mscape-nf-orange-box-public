@@ -42,7 +42,7 @@ workflow ORANGE_BOX {
     FINAL_ONYX_UPDATE(climb_id, "QC", QC_SAMPLE.out.analysis_json, server, bucket, FIRST_ONYX_WRITE.out.temp_analysis_id_file, S3_UPLOAD.out.s3_location_json)
 
 
-    // fake claspar funnel processes
+    // claspar funnel processes
     FOW__CLASPAR_VIRALIGN(climb_id, "CLASPAR_VA", CLASPAR.out.analysis_json_viralign, server, bucket, PORTAL.out.ready_to_go)
     S3U__CLASPAR_VIRALIGN(climb_id, "CLASPAR_VA", server, bucket, FOW__CLASPAR_VIRALIGN.out.temp_analysis_id_file, CLASPAR.out.upload_files_viralign)
     FOU__CLASPAR_VIRALIGN(climb_id, "CLASPAR_VA", CLASPAR.out.analysis_json_viralign, server, bucket, FOW__CLASPAR_VIRALIGN.out.temp_analysis_id_file, S3U__CLASPAR_VIRALIGN.out.s3_location_json)
@@ -54,7 +54,7 @@ workflow ORANGE_BOX {
     FOW__CLASPAR_SYLPH(climb_id, "CLASPAR_SYLPH", CLASPAR.out.analysis_json_sylph, server, bucket, PORTAL.out.ready_to_go)
     S3U__CLASPAR_SYLPH(climb_id, "CLASPAR_SYLPH", server, bucket, FOW__CLASPAR_SYLPH.out.temp_analysis_id_file, CLASPAR.out.upload_files_sylph)
     FOU__CLASPAR_SYLPH(climb_id, "CLASPAR_SYLPH", CLASPAR.out.analysis_json_sylph, server, bucket, FOW__CLASPAR_SYLPH.out.temp_analysis_id_file, S3U__CLASPAR_SYLPH.out.s3_location_json)
-    // end of fake claspar funnel processes
+    // end of claspar funnel processes
 
 
     PUBLISH_ONYX(climb_id, server, FINAL_ONYX_UPDATE.out.analysis_id_file, FOU__CLASPAR_VIRALIGN.out.analysis_id_file, FOU__CLASPAR_KRAKEN.out.analysis_id_file, FOU__CLASPAR_SYLPH.out.analysis_id_file)
