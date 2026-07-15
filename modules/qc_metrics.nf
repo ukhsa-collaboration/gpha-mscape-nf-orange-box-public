@@ -35,7 +35,6 @@ process QC_SAMPLE {
     script:
     """
     qc_sample -i $climb_id -o . -s $server --store-onyx
-    echo "about to copy debs output"
     cp ${climb_id}_qc_metrics_analysis_fields.json  ${climb_id}.QC.analysis_fields.json
     """
 }
