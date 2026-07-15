@@ -182,7 +182,7 @@ process FINAL_ONYX_UPDATE {
     echo '# # # # # starting funnel task: FinalOnyxUpdate'
     orange_box_onyx_s3.py    --climb_id $climb_id  \
     --json ${climb_id}.${orange_box_module}.s3_location.json  --server $server  \
-    --bucket $bucket  --orange_box_module $orange_box_module  --task FinalOnyxUpdate \
+    --bucket $bucket  --orange_box_module $orange_box_module  --task FinalOnyxUpdate
     echo '# # # # # finished funnel task: FinalOnyxUpdate'
     """
 }
