@@ -1,5 +1,20 @@
 # Changelog
 
+
+
+[unreleased]v.1.0.0
+neat first release
+### Changes:
+* Added devscape to the profiles
+* bumped claspar and QC versions.
+### Added:
+### Fixed:
+### Security:
+### Deprecated:
+### Removed:
+
+---
+---
 ## v1.0.1-beta
 Updated Claspar version.
 
