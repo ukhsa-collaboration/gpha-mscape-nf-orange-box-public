@@ -18,11 +18,11 @@ python orange_portal.py --climb_id ID-12345678  --server mscape  \
     ID-12345678.QC.analysis_id,ID-12345678.virus_reclassification.analysis_id
 """
 
-from onyx_analysis_helper import onyx_analysis_helper_functions as oa
 import argparse
 import logging
 import sys
-from pathlib import Path
+
+from onyx_analysis_helper import onyx_analysis_helper_functions as oa
 
 
 def get_args():
@@ -33,18 +33,24 @@ def get_args():
         updating all Onyx analyses and uploaded all results files to S3.
         On successful completion will have published Onyx analyses for all
         Orange Box modules.
-        """
+        """,
     )
     parser.add_argument(
         "--server",
         "-s",
         type=str,
         required=True,
-        choices=["mscape", "synthscape"],
+        choices=["mscape", "synthscape", "devscape"],
         help="Specify server code is being run on",
     )
     parser.add_argument("--climb_id", "-c", type=str, required=True, help="Climb_id")
-    parser.add_argument("--analysis_id_files", "-a", type=str, required=True, help="Comma-separated list of analysis_ids to publish to Onyx")
+    parser.add_argument(
+        "--analysis_id_files",
+        "-a",
+        type=str,
+        required=True,
+        help="Comma-separated list of analysis_ids to publish to Onyx",
+    )
 
     return parser.parse_args()
 
@@ -77,7 +83,11 @@ def read_analysis_id_from_file(analysis_id_file):
             if len(lines) == 1:
                 analysis_id = lines[0]
             else:
-                logging.error("Analysis_id_file should contain 1 line: %s contained %s lines", analysis_id_file, len(lines))
+                logging.error(
+                    "Analysis_id_file should contain 1 line: %s contained %s lines",
+                    analysis_id_file,
+                    len(lines),
+                )
                 exitcode = 1
                 return None, exitcode
     except:
@@ -97,6 +107,8 @@ Tasks for this script:
       these are named as: ${climb_id}.${orange_box_module}.analysis_id
   (2) For each analysis_id, perform the final write-to-onyx step and PUBLISH
 """
+
+
 def main():
     args = get_args()
     exitcode = 0
@@ -110,39 +122,57 @@ def main():
     analysis_id_to_file = dict()
 
     # Read analysis_ids from each analysis_id_file in analysis_id_files
-    for analysis_id_file in args.analysis_id_files.split(','):
+    for analysis_id_file in args.analysis_id_files.split(","):
         analysis_id, exitcode = read_analysis_id_from_file(analysis_id_file)
         if exitcode != 0:
-            logging.error("Unable to read analysis_id from analysis_id_file: %s", analysis_id_file)
+            logging.error(
+                "Unable to read analysis_id from analysis_id_file: %s", analysis_id_file
+            )
         else:
-        # Add the analysis_id to the list and store link between analysis_id and analysis_id_file
+            # Add the analysis_id to the list and store link between analysis_id and analysis_id_file
             analysis_ids.append(analysis_id)
             analysis_id_to_file[analysis_id] = analysis_id_file
 
     # Make script die after attempting to load all analysis_id files
     # and not die after the first fail
     if exitcode != 0:
-        logging.error("Unable to read one or more analysis_id_files: check log file for details")
+        logging.error(
+            "Unable to read one or more analysis_id_files: check log file for details"
+        )
         return exitcode
     # Sanity check for now - ensure the number of analysis IDs in the list
     # is the same as the number of analysis_id_files:
-    if len(analysis_ids) != len(args.analysis_id_files.split(',')):
+    if len(analysis_ids) != len(args.analysis_id_files.split(",")):
         exitcode = 1
-        logging.error("Unexpected error: number of analysis_ids didn't match number of analysis_id files: %s",
-                      args.analysis_id_files)
+        logging.error(
+            "Unexpected error: number of analysis_ids didn't match number of analysis_id files: %s",
+            args.analysis_id_files,
+        )
         return exitcode
 
     for analysis_id in analysis_ids:
         onyx_analysis = oa.OnyxAnalysis()
         # Final write to Onyx - publishing a skeleton Onyx Analysis object for each analysis
-        analysis_id_json, exitcode = onyx_analysis.update_onyx_analysis(server=args.server, analysis_id=analysis_id, dryrun=False, publish_analysis=True)
+        analysis_id_json, exitcode = onyx_analysis.update_onyx_analysis(
+            server=args.server,
+            analysis_id=analysis_id,
+            dryrun=False,
+            publish_analysis=True,
+        )
 
         if exitcode != 0:
-            logging.error("Onyx publish step failed for: %s using analysis_id: %s loaded from: %s on: %s",
-                         args.climb_id, analysis_id, analysis_id_to_file[analysis_id], args.server)
+            logging.error(
+                "Onyx publish step failed for: %s using analysis_id: %s loaded from: %s on: %s",
+                args.climb_id,
+                analysis_id,
+                analysis_id_to_file[analysis_id],
+                args.server,
+            )
 
     if exitcode != 0:
-        logging.error("Incomplete Onyx publish step - one or more analyses failed to publish: check log file for details")
+        logging.error(
+            "Incomplete Onyx publish step - one or more analyses failed to publish: check log file for details"
+        )
         return exitcode
 
     # End of all publish steps - if we get this far everything should have worked...
