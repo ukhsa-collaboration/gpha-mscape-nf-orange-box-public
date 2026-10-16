@@ -16,7 +16,7 @@ process QC_SAMPLE {
             - exit_code: Exit status for the program.
             - result_file: Path to the onyx analysis json file.
     */
-    container 'ghcr.io/ukhsa-collaboration/gpha-mscape-sample-qc:0.2.1'
+    container 'ghcr.io/ukhsa-collaboration/gpha-mscape-sample-qc:0.2.2'
     cpus 1
     memory '1GB'
     tag "${climb_id}"
@@ -35,7 +35,6 @@ process QC_SAMPLE {
     script:
     """
     qc_sample -i $climb_id -o . -s $server --store-onyx
-    echo "about to copy debs output"
     cp ${climb_id}_qc_metrics_analysis_fields.json  ${climb_id}.QC.analysis_fields.json
     """
 }

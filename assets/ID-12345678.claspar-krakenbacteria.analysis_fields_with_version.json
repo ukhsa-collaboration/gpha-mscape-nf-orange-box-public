@@ -1,0 +1,15 @@
+{
+    "identifiers": [],
+    "name": "pipeline-test-dummy-module-claspar-kraken",
+    "description": "This is a dummy analysis to create a mostly blank Onyx analysis for pipeline testing.  None of the data in the record should be used for any other purpose.",
+    "analysis_date": "2026-03-26",
+    "pipeline_name": "dummy-module-claspar-kraken",
+    "pipeline_version": "0.1.0",
+    "pipeline_url": "https://github.com/ukhsa-collaboration/repo",
+    "methods": "{\"onyx_versions_hash\": \"ABC123\", \"versions\": [{\"name\": \"classifier_version\", \"version\": \"1.1.1\"}, {\"name\": \"classifier_db_date\", \"version\": \"1970.01.01\"}, {\"name\": \"ncbi_taxonomy_date\", \"version\": \"1970.01.01\"}, {\"name\": \"scylla_version\", \"version\": \"1.1.1\"}, {\"name\": \"sylph_db_version\", \"version\": \"1.1.1\"}, {\"name\": \"alignment_db_version\", \"version\": \"1.1.1\"}, {\"name\": \"claspar_version\", \"version\": \"2.1.0\"}, {\"name\": \"orange_box_version\", \"version\": \"1.0.0\"}], \"thresholds\": {\"READ_THRESHOLD\": 10}}",
+    "result": "Warning: These results should not be used",
+    "result_metrics": "{\"metric1\": 3915, \"metric2\": 3.1, \"metric3\": 2.9}",
+    "synthscape_records": [
+        "ID-12345678"
+    ]
+}
