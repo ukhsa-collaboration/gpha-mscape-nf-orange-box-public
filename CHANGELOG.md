@@ -1,4 +1,17 @@
 # Changelog
+## 2026-11-18 v.1.0.5 - Orange Box
+Merging refactor/unclassified-qc with pre-production branch
+
+### Changes:
+- Now handles all sample metadata as a channel
+
+### Added:
+- Unclassified-qc processes
+- Profiles for resources
+- Upload of unclassified-qc processes
+
+---
+---
 
 ## 2026-11-18 v.1.0.4 - Orange Box
 Merging feat/samplesheet with pre-production branch
