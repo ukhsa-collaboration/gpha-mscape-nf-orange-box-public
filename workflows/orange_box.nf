@@ -1,17 +1,9 @@
-include { QC_ANALYSIS }      from "../subworkflows/qc.nf"
-include { QC_FUNNEL }        from "../subworkflows/qc.nf"
 
-include { CLASPAR_ANALYSIS } from "../subworkflows/claspar.nf"
-include { CLASPAR_FUNNEL }   from "../subworkflows/claspar.nf"
-
-include { UNCLASSIFIED_QC_ANALYSIS } from "../subworkflows/unclassified_qc.nf"
-include { UNCLASSIFIED_QC_FUNNEL }   from "../subworkflows/unclassified_qc.nf"
-
-include { PORTAL }           from "../modules/funnel_processes.nf"
-include { PUBLISH_ONYX }     from "../modules/funnel_processes.nf"
 include { QC_SAMPLE    }              from "../modules/qc_metrics.nf"
 include { CLASPAR      }              from "../modules/claspar.nf"
 include { ONYX_UPLOADS }              from "../subworkflows/onyx_uploads.nf"
+include { UNCLASSIFIED_QC_ANALYSIS } from "../subworkflows/unclassified_qc.nf"
+
 
 workflow ORANGE_BOX {
 
@@ -28,6 +20,7 @@ workflow ORANGE_BOX {
     // Run on All samples subworkflow
     QC_SAMPLE(climb_id, out_dir, server)
     CLASPAR(climb_id, server, profiles_json, taxaplease)
+    UNCLASSIFIED_QC_ANALYSIS(samplesheet, server, outdir)
 
     if (params.skip_onyx_upload) {
         log.info "skip_onyx_upload is set: QC and ClasPar results will not be written to Onyx or uploaded to S3."
@@ -44,28 +37,14 @@ workflow ORANGE_BOX {
             CLASPAR.out.analysis_json_kraken,
             CLASPAR.out.upload_files_kraken,
             CLASPAR.out.analysis_json_sylph,
-            CLASPAR.out.upload_files_sylph
+            CLASPAR.out.upload_files_sylph,
+            UNCLASSIFIED_QC_ANALYSIS.out.analysis_json,
+            UNCLASSIFIED_QC_ANALYSIS.out.upload_files
         )
     }
 
-    QC_ANALYSIS(
-        climb_id,
-        out_dir,
-        server
-    )
 
-    CLASPAR_ANALYSIS(
-        climb_id,
-        server,
-        profiles_json,
-        taxaplease
-    )
 
-    UNCLASSIFIED_QC_ANALYSIS(
-        samplesheet,
-        server,
-        outdir
-    )
 
 
     PORTAL(

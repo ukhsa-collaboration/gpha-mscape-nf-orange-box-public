@@ -1,8 +1,5 @@
 #!/usr/bin/env nextflow
-
 include { FASTQ_READ_STATS } from "../modules/unclassified_readqc.nf"
-
-include { ANALYSIS_FUNNEL } from "../workflows/analysis_funnel.nf"
 
 workflow UNCLASSIFIED_QC_ANALYSIS {
 
@@ -44,35 +41,4 @@ workflow UNCLASSIFIED_QC_ANALYSIS {
     emit:
     analysis_json = CREATE_READQC_ONYX_JSON.out.stats_summary
     upload_files = CREATE_READQC_ONYX_JSON.out.upload_files
-}
-
-workflow UNCLASSIFIED_QC_FUNNEL {
-
-    take:
-    climb_id
-    server
-    bucket
-    ready_to_go
-    analysis_json
-    upload_files
-
-    main:
-
-    ANALYSIS_FUNNEL(
-        climb_id,
-        "unclassified-read-qc",
-        analysis_json,
-        server,
-        bucket,
-        ready_to_go,
-        upload_files
-    )
-
-    emit:
-
-    analysis_id_file =
-        ANALYSIS_FUNNEL.out.analysis_id_file
-
-    funnel_logs =
-        ANALYSIS_FUNNEL.out.funnel_logs
 }
