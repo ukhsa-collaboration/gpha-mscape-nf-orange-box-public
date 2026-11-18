@@ -28,7 +28,7 @@ workflow UNCLASSIFIED_QC_ANALYSIS {
             tuple(meta, readQC_file.text.trim(), stats_list)
         }
 
-    CREATE_READQC_ONYX_JSON(normalized_readQC_complete, server)
+    CREATE_READQC_ONYX_JSON(ch_readqc, server)
 
     emit:
     analysis_json = CREATE_READQC_ONYX_JSON.out.stats_summary
