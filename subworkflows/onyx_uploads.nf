@@ -47,22 +47,22 @@ workflow ONYX_UPLOADS {
 
     main:
     // QC
-    FOW__QC(climb_id, "QC", qc_analysis_json, server, bucket, ready_to_go)
+    FOW__QC(climb_id, "QC", qc_analysis_json, server, bucket)
     S3U__QC(climb_id, "QC", server, bucket, FOW__QC.out.temp_analysis_id_file, qc_upload_files)
     FOU__QC(climb_id, "QC", qc_analysis_json, server, bucket, FOW__QC.out.temp_analysis_id_file, S3U__QC.out.s3_location_json)
 
     // ClasPar: viral aligner
-    FOW__CLASPAR_VIRALIGN(climb_id, "CLASPAR_VA", viralign_analysis_json, server, bucket, ready_to_go)
+    FOW__CLASPAR_VIRALIGN(climb_id, "CLASPAR_VA", viralign_analysis_json, server, bucket)
     S3U__CLASPAR_VIRALIGN(climb_id, "CLASPAR_VA", server, bucket, FOW__CLASPAR_VIRALIGN.out.temp_analysis_id_file, viralign_upload_files)
     FOU__CLASPAR_VIRALIGN(climb_id, "CLASPAR_VA", viralign_analysis_json, server, bucket, FOW__CLASPAR_VIRALIGN.out.temp_analysis_id_file, S3U__CLASPAR_VIRALIGN.out.s3_location_json)
 
     // ClasPar: kraken
-    FOW__CLASPAR_KRAKEN(climb_id, "CLASPAR_KRAKEN", kraken_analysis_json, server, bucket, ready_to_go)
+    FOW__CLASPAR_KRAKEN(climb_id, "CLASPAR_KRAKEN", kraken_analysis_json, server, bucket)
     S3U__CLASPAR_KRAKEN(climb_id, "CLASPAR_KRAKEN", server, bucket, FOW__CLASPAR_KRAKEN.out.temp_analysis_id_file, kraken_upload_files)
     FOU__CLASPAR_KRAKEN(climb_id, "CLASPAR_KRAKEN", kraken_analysis_json, server, bucket, FOW__CLASPAR_KRAKEN.out.temp_analysis_id_file, S3U__CLASPAR_KRAKEN.out.s3_location_json)
 
     // ClasPar: sylph
-    FOW__CLASPAR_SYLPH(climb_id, "CLASPAR_SYLPH", sylph_analysis_json, server, bucket, ready_to_go)
+    FOW__CLASPAR_SYLPH(climb_id, "CLASPAR_SYLPH", sylph_analysis_json, server, bucket)
     S3U__CLASPAR_SYLPH(climb_id, "CLASPAR_SYLPH", server, bucket, FOW__CLASPAR_SYLPH.out.temp_analysis_id_file, sylph_upload_files)
     FOU__CLASPAR_SYLPH(climb_id, "CLASPAR_SYLPH", sylph_analysis_json, server, bucket, FOW__CLASPAR_SYLPH.out.temp_analysis_id_file, S3U__CLASPAR_SYLPH.out.s3_location_json)
 

@@ -6,7 +6,6 @@ process FIRST_ONYX_WRITE {
         - Pushes Orange box analysis results to Onyx and S3 to prepare for publishing an Onyx record
         Inputs:
             - Requires climb_id, nickname of Orange Box module (e.g. QC), outputs from Orange Box modules and
-              ready_to_go signal from PORTAL process: this triggers the process to run only on successful completion
               of *all* Orange Box modules.
 
         Outputs:
@@ -28,7 +27,6 @@ process FIRST_ONYX_WRITE {
     path "${climb_id}.${orange_box_module}.analysis_fields.json"
     val server
     val bucket
-    val ready_to_go
 
     output:
     path "${climb_id}.${orange_box_module}.temp.analysis_id", emit: temp_analysis_id_file
