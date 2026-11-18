@@ -16,7 +16,7 @@ process QC_SAMPLE {
             - exit_code: Exit status for the program.
             - result_file: Path to the onyx analysis json file.
     */
-    container 'ghcr.io/ukhsa-collaboration/gpha-mscape-sample-qc:0.2.1'
+    container 'ghcr.io/ukhsa-collaboration/gpha-mscape-sample-qc:0.2.2'
     cpus 1
     memory '1GB'
     tag "${climb_id}"
