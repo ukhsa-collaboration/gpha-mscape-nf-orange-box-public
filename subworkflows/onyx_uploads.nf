@@ -2,12 +2,11 @@
 
 /*
     ONYX_UPLOADS subworkflow
-        - Takes the outputs of the QC_SAMPLE and CLASPAR modules and pushes them through the Onyx/S3 funnel:
+        - Takes the outputs of analysees and pushes them through the Onyx/S3 funnel:
           PORTAL -> FIRST_ONYX_WRITE -> S3_UPLOAD -> FINAL_ONYX_UPDATE (per analysis) -> PUBLISH_ONYX.
         - Called from workflows/orange_box.nf unless --skip_onyx_upload is set.
 */
 
-include { PORTAL }                                       from "../modules/funnel_processes.nf"
 include { PUBLISH_ONYX }                                 from "../modules/funnel_processes.nf"
 
 include { FIRST_ONYX_WRITE  as FOW__QC }                 from "../modules/funnel_processes.nf"
