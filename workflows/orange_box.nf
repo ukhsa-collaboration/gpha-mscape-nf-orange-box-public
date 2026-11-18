@@ -37,8 +37,8 @@ workflow ORANGE_BOX {
             CLASPAR.out.upload_files_kraken,
             CLASPAR.out.analysis_json_sylph,
             CLASPAR.out.upload_files_sylph,
-            // UNCLASSIFIED_QC_ANALYSIS.out.analysis_json,
-            // UNCLASSIFIED_QC_ANALYSIS.out.upload_files
+            UNCLASSIFIED_QC_ANALYSIS.out.analysis_json,
+            UNCLASSIFIED_QC_ANALYSIS.out.upload_files
         )
     }
 }
