@@ -16,7 +16,7 @@ workflow ORANGE_BOX {
     taxaplease
 
     main:
-    // Run anlayses
+    // Run analyses
     // Run on All samples subworkflow
     QC_SAMPLE(climb_id, out_dir, server)
     CLASPAR(climb_id, server, profiles_json, taxaplease)
