@@ -12,6 +12,7 @@ Merging feat/samplesheet with pre-production branch
 - QC and CLASPAR subworkflows as they only call a single process
 - Python scripts in bin (no longer used)
 - Tests no longer used
+- Removed docker file
 
 
 v.1.0.0 - Orange Box
