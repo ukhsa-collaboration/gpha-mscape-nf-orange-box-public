@@ -6,6 +6,6 @@ nextflow run /ukhsa-collaboration/gpha-mscape-nf-orange-box-public \
     -profile climb,<*SCAPE> \
     --samplesheet <samplesheet> \
     --taxaplease_db <taxaplease_db> \
-    --profile_tables <profile_table> \
+    --profiles_json <profiles_json> \
     --outdir <outdir> \
 ```
