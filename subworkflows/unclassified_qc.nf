@@ -5,13 +5,13 @@ include { CREATE_READQC_ONYX_JSON } from "../modules/unclassified_qc.nf"
 workflow UNCLASSIFIED_QC_ANALYSIS {
 
     take:
-    meta
+    ch_meta
     server
     outdir
 
     main:
 
-    ch_fastqs = samplesheet
+    ch_meta
         .map { row ->
             def climb_id = row.climb_id
             def fastq1 = row.unclassified_reads_1

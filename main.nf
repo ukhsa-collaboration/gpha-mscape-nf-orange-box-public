@@ -24,10 +24,8 @@ workflow {
         .set { ch_climbids }
 
     ch_meta = samplesheet.map { row -> row }   // whole row is the meta map
-    ch_climb_id = ch_meta.map { meta -> meta.climb_id }
 
     ch_meta.view()
-    ch_climb_id.view()
 
-    ORANGE_BOX(ch_climb_id, ch_meta, params.outdir, params.server, params.bucket, params.profiles_json, params.taxaplease_db)
+    // ORANGE_BOX(ch_meta, params.outdir, params.server, params.bucket, params.profiles_json, params.taxaplease_db)
 }
