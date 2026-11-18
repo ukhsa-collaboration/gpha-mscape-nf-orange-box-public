@@ -18,7 +18,7 @@ process CLASPAR {
     container 'ghcr.io/ukhsa-collaboration/gpha-mscape-orangebox-claspar:latest'
     cpus 1
     memory '2GB'
-    tag "${meta.climb_id}"
+    tag "${sample_ch.climb_id}"
     publishDir "$params.outdir/claspar", mode: "copy"
 
     input:
