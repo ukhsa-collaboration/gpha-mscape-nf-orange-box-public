@@ -11,33 +11,21 @@ workflow UNCLASSIFIED_QC_ANALYSIS {
 
     main:
 
-    ch_meta
-        .map { row ->
-            def climb_id = row.climb_id
-            def fastq1 = row.unclassified_reads_1
-            def fastq2 = row.containsKey('unclassified_reads_2') ? row.unclassified_reads_2 : null
-
-            if (fastq2) {
-                tuple(climb_id, [fastq1, fastq2])
-            } else {
-                tuple(climb_id, [fastq1])
-            }
-        }
+    ch_fastqs = ch_meta.map { meta ->
+        def reads = [ch_meta.unclassified_reads_1, ch_meta.unclassified_reads_2]
+            .findAll { it }
+            .collect { file(it) }
+        tuple(ch_meta, reads)
+    }
 
     stats_ch = FASTQ_READ_STATS(ch_fastqs, outdir).readQC
 
-    normalized_readQC_complete = stats_ch
-        .map { climb_id, readQC_file, stats_files ->
-            def stats_list = (stats_files instanceof List) ? stats_files : [stats_files]
-            def qc_text = readQC_file.text
-            tuple(climb_id, qc_text, stats_list)
-        }
+    normalized_readQC_complete = stats_ch.map { ch_meta, readQC_file, stats_files ->
+        def stats_list = stats_files instanceof List ? stats_files : [stats_files]
+        tuple(ch_meta, readQC_file.text, stats_list)
+    }
 
-    CREATE_READQC_ONYX_JSON(
-        normalized_readQC_complete,
-        server,
-        outdir
-    )
+    CREATE_READQC_ONYX_JSON(normalized_readQC_complete, server, outdir)
 
     emit:
     analysis_json = CREATE_READQC_ONYX_JSON.out.stats_summary
