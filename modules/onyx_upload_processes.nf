@@ -185,6 +185,7 @@ process PUBLISH_ONYX {
     input:
     val sample_ch
     val server
+    // QC Analysis inputs
     path "${sample_ch.climb_id}.QC.analysis_id"
 
     // claspar inputs
@@ -194,6 +195,9 @@ process PUBLISH_ONYX {
 
     output:
     path "${sample_ch.climb_id}.Orange_Box_Onyx_publish_log.txt", emit: publish_logs
+
+    // QC Analysis inputs
+    path "${sample_ch.climb_id}.UNCLASS_QC.analysis_id"
 
    script:
     """
