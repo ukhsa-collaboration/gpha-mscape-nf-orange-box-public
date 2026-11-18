@@ -18,30 +18,30 @@ process CLASPAR {
     container 'ghcr.io/ukhsa-collaboration/gpha-mscape-orangebox-claspar:latest'
     cpus 1
     memory '2GB'
-    tag "${climb_id}"
+    tag "${meta.climb_id}"
     publishDir "$params.outdir/claspar", mode: "copy"
 
     input:
-    val climb_id
+    val(sample_ch)
     val server
     path profiles_json
     path taxaplease
 
     output:
-    path "${climb_id}_viral_aligner_processed.csv", emit: upload_files_viralign
-    tuple (path "${climb_id}_kraken_processed_genera.csv"), (path "${climb_id}_kraken_processed_species.csv"), emit: upload_files_kraken
-    path "${climb_id}_sylph_processed.csv", emit: upload_files_sylph
+    path "${sample_ch.climb_id}_viral_aligner_processed.csv", emit: upload_files_viralign
+    tuple (path "${sample_ch.climb_id}_kraken_processed_genera.csv"), (path "${sample_ch.climb_id}_kraken_processed_species.csv"), emit: upload_files_kraken
+    path "${sample_ch.climb_id}_sylph_processed.csv", emit: upload_files_sylph
 
-    path "${climb_id}.claspar-viralaligner.analysis_fields.json", emit: analysis_json_viralign
-    path "${climb_id}.claspar-krakenbacteria.analysis_fields.json", emit: analysis_json_kraken
-    path "${climb_id}.claspar-sylph.analysis_fields.json", emit: analysis_json_sylph
+    path "${sample_ch.climb_id}.claspar-viralaligner.analysis_fields.json", emit: analysis_json_viralign
+    path "${sample_ch.climb_id}.claspar-krakenbacteria.analysis_fields.json", emit: analysis_json_kraken
+    path "${sample_ch.climb_id}.claspar-sylph.analysis_fields.json", emit: analysis_json_sylph
 
     //path "${climb_id}_.*_claspar.log", emit: logs
 
     script:
     """
     echo "Running ClasPar..."
-    claspar -i $climb_id -o . -s $server -p $profiles_json -d $taxaplease
+    claspar -i $sample_ch.climb_id -o . -s $server -p $profiles_json -d $taxaplease
 
     echo "Finished ClasPar."
     """

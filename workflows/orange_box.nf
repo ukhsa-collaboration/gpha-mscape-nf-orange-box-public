@@ -18,8 +18,8 @@ workflow ORANGE_BOX {
     main:
     // Run analyses
     // Run on All samples subworkflow
-    QC_SAMPLE(sample_ch.climb_id, out_dir, server)
-    CLASPAR(sample_ch.climb_id, server, profiles_json, taxaplease)
+    QC_SAMPLE(sample_ch, out_dir, server)
+    CLASPAR(sample_ch, server, profiles_json, taxaplease)
     // UNCLASSIFIED_QC_ANALYSIS(ch_meta, server, outdir)
 
     if (params.skip_onyx_upload) {
@@ -27,7 +27,7 @@ workflow ORANGE_BOX {
     }
     else {
         ONYX_UPLOADS(
-            sample_ch.climb_id,
+            sample_ch,
             server,
             bucket,
             QC_SAMPLE.out.analysis_json,

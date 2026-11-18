@@ -19,22 +19,22 @@ process QC_SAMPLE {
     container 'ghcr.io/ukhsa-collaboration/gpha-mscape-sample-qc:latest'
     cpus 1
     memory '1GB'
-    tag "${climb_id}"
+    tag "${sample_ch.climb_id}"
     publishDir "$params.outdir/qc_sample", mode: "copy"
 
     input:
-    val climb_id
+    val sample_ch
     val qc_dir
     val server
 
     output:
-    path "${climb_id}.QC.analysis_fields.json", emit: analysis_json
-    path "${climb_id}_qc_results.json", emit: upload_files, optional: true
-    path "${climb_id}_qc_metrics_log.txt", emit: logs
+    path "${sample_ch.climb_id}.QC.analysis_fields.json", emit: analysis_json
+    path "${sample_ch.climb_id}_qc_results.json", emit: upload_files, optional: true
+    path "${sample_ch.climb_id}_qc_metrics_log.txt", emit: logs
 
     script:
     """
-    qc_sample -i $climb_id -o . -s $server --store-onyx
-    cp ${climb_id}_qc_metrics_analysis_fields.json  ${climb_id}.QC.analysis_fields.json
+    qc_sample -i $sample_ch.climb_id -o . -s $server --store-onyx
+    cp ${sample_ch.climb_id}_qc_metrics_analysis_fields.json  ${sample_ch.climb_id}.QC.analysis_fields.json
     """
 }
