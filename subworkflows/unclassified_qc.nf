@@ -1,5 +1,5 @@
 #!/usr/bin/env nextflow
-include { FASTQ_READ_STATS } from "../modules/unclassified_readqc.nf"
+include { FASTQ_READ_STATS } from "../modules/unclassified_qc.nf"
 
 workflow UNCLASSIFIED_QC_ANALYSIS {
 
