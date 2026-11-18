@@ -24,7 +24,6 @@ process QC_SAMPLE {
 
     input:
     val sample_ch
-    val qc_dir
     val server
 
     output:
