@@ -16,8 +16,7 @@ process CLASPAR {
             - 3 analysis_json_* channels for viral_aligner, kraken-bacteria and sylph analyses to be added to Onyx.
     */
     container 'ghcr.io/ukhsa-collaboration/gpha-mscape-orangebox-claspar:latest'
-    cpus 1
-    memory '2GB'
+    label "process_low"
     tag "${sample_ch.climb_id}"
     publishDir "${params.outdir}/claspar", mode: "copy"
 

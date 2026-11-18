@@ -16,8 +16,7 @@ process QC_SAMPLE {
             - result_file: Path to the onyx analysis json file.
     */
     container 'ghcr.io/ukhsa-collaboration/gpha-mscape-sample-qc:latest'
-    cpus 1
-    memory '1GB'
+    label "process_single"
     tag "${sample_ch.climb_id}"
     publishDir "${params.outdir}/qc_sample", mode: "copy"
 

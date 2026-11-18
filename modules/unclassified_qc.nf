@@ -13,7 +13,7 @@ process FASTQ_READ_STATS {
             - result_file: Path to the output statistics table.
             - readQC_complete.txt: Path to the file reporting process success.
     */
-    label "process_tiny"
+    label "process_low"
     tag "${ch_meta.climb_id}"
 
     // change to the gpha-mscape-fastq-read-stats container
@@ -68,8 +68,7 @@ process CREATE_READQC_ONYX_JSON {
     */
 
     container 'ghcr.io/ukhsa-collaboration/gpha-mscape-fastq-read-stats:1.0.0'
-    cpus 2
-    memory '2GB'
+    label "process_low"
     tag "${ch_meta.climb_id}"
     publishDir "${params.outdir}", mode: 'copy'
 

@@ -13,8 +13,7 @@ process FIRST_ONYX_WRITE {
               publish step will then use these with skeleton OnyxAnalysis helper objects to publish each analysis.
     */
     container 'ghcr.io/ukhsa-collaboration/gpha-mscape-onyx-analysis-helper:latest'
-    cpus 1
-    memory '1GB'
+    label "process_single"
     tag "Funnelling ${sample_ch.climb_id} Orange Box analyses: FirstWriteToOnyx"
     publishDir "$params.outdir/funnel", mode: "copy"
 
@@ -62,8 +61,7 @@ process S3_UPLOAD {
               publish step will then use these with skeleton OnyxAnalysis helper objects to publish each analysis.
     */
     container 'ghcr.io/ukhsa-collaboration/gpha-mscape-onyx-analysis-helper:latest'
-    cpus 1
-    memory '1GB'
+    label "process_single"
     tag "Funnelling ${sample_ch.climb_id} Orange Box analyses: S3Upload"
     publishDir "$params.outdir/funnel", mode: "copy"
 
@@ -126,8 +124,7 @@ process FINAL_ONYX_UPDATE {
               publish step will then use these with skeleton OnyxAnalysis helper objects to publish each analysis.
     */
     container 'ghcr.io/ukhsa-collaboration/gpha-mscape-onyx-analysis-helper:latest'
-    cpus 1
-    memory '1GB'
+    label "process_single"
     tag "Funnelling ${sample_ch.climb_id} Orange Box analyses: FinalOnyxUpdate"
     publishDir "$params.outdir/funnel", mode: "copy"
 
@@ -178,8 +175,7 @@ process PUBLISH_ONYX {
             - None, bar a log file.
     */
     container 'ghcr.io/ukhsa-collaboration/gpha-mscape-onyx-analysis-helper:latest'
-    cpus 1
-    memory '1GB'
+    label "process_single"
     tag "Funnelling ${sample_ch.climb_id} Orange Box analyses: Publish to Onyx"
     publishDir "$params.outdir/funnel", mode: "copy"
 
