@@ -8,7 +8,7 @@ include { UNCLASSIFIED_QC_ANALYSIS } from "../subworkflows/unclassified_qc.nf"
 workflow ORANGE_BOX {
 
     take:
-    ch_meta
+    sample_ch
     out_dir
     server
     bucket
@@ -18,9 +18,9 @@ workflow ORANGE_BOX {
     main:
     // Run analyses
     // Run on All samples subworkflow
-    QC_SAMPLE(ch_meta.climb_id, out_dir, server)
-    CLASPAR(ch_meta.climb_id, server, profiles_json, taxaplease)
-    UNCLASSIFIED_QC_ANALYSIS(ch_meta, server, outdir)
+    QC_SAMPLE(sample_ch.climb_id, out_dir, server)
+    CLASPAR(sample_ch.climb_id, server, profiles_json, taxaplease)
+    // UNCLASSIFIED_QC_ANALYSIS(ch_meta, server, outdir)
 
     if (params.skip_onyx_upload) {
         log.info "skip_onyx_upload is set: QC and ClasPar results will not be written to Onyx or uploaded to S3."
@@ -38,8 +38,8 @@ workflow ORANGE_BOX {
             CLASPAR.out.upload_files_kraken,
             CLASPAR.out.analysis_json_sylph,
             CLASPAR.out.upload_files_sylph,
-            UNCLASSIFIED_QC_ANALYSIS.out.analysis_json,
-            UNCLASSIFIED_QC_ANALYSIS.out.upload_files
+            // UNCLASSIFIED_QC_ANALYSIS.out.analysis_json,
+            // UNCLASSIFIED_QC_ANALYSIS.out.upload_files
         )
     }
 
