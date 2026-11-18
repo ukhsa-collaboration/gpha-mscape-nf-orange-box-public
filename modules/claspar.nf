@@ -19,7 +19,7 @@ process CLASPAR {
     cpus 1
     memory '2GB'
     tag "${sample_ch.climb_id}"
-    publishDir "$params.outdir/claspar", mode: "copy"
+    publishDir "${params.outdir}/claspar", mode: "copy"
 
     input:
     val(sample_ch)

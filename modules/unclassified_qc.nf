@@ -18,11 +18,10 @@ process FASTQ_READ_STATS {
 
     // change to the gpha-mscape-fastq-read-stats container
     container "ghcr.io/ukhsa-collaboration/gpha-mscape-fastq-read-stats:1.0.0"
-    publishDir "${outdir}/${ch_meta.climb_id}", mode: 'copy'
+    publishDir "${params.outdir}/${ch_meta.climb_id}", mode: 'copy'
 
     input:
     tuple val(ch_meta), path(reads)
-    val outdir
 
     output:
     tuple val(ch_meta), path("readQC_complete.txt"), path("*.stats"), emit: readQC
@@ -72,12 +71,11 @@ process CREATE_READQC_ONYX_JSON {
     cpus 2
     memory '2GB'
     tag "${ch_meta.climb_id}"
-    publishDir "${outdir}", mode: 'copy'
+    publishDir "${params.outdir}", mode: 'copy'
 
     input:
     tuple val(ch_meta), val(qc_text), path(stats_list)
     val server
-    val outdir
 
     output:
     path("${ch_meta.climb_id}.unclassified_readQC.analysis_fields.json"), emit: stats_summary

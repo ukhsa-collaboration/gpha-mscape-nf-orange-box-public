@@ -18,5 +18,5 @@ workflow {
 
     sample_ch.view()
 
-    ORANGE_BOX(sample_ch, params.outdir, params.server, params.bucket, params.profiles_json, params.taxaplease_db)
+    ORANGE_BOX(sample_ch, params.server, params.bucket, params.profiles_json, params.taxaplease_db)
 }

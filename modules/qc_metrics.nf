@@ -20,7 +20,7 @@ process QC_SAMPLE {
     cpus 1
     memory '1GB'
     tag "${sample_ch.climb_id}"
-    publishDir "$params.outdir/qc_sample", mode: "copy"
+    publishDir "${params.outdir}/qc_sample", mode: "copy"
 
     input:
     val sample_ch
