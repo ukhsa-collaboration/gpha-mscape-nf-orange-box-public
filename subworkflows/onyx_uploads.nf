@@ -49,9 +49,9 @@ workflow ONYX_UPLOADS {
     sylph_analysis_json
     sylph_upload_files
 
-    // Unclassified QC_SAMPLE outputs
-    unclass_qc_analysis_json
-    unclass_qc_upload_files
+    // // Unclassified QC_SAMPLE outputs
+    // unclass_qc_analysis_json
+    // unclass_qc_upload_files
 
     main:
     // QC
