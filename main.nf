@@ -22,11 +22,6 @@ workflow {
             return climb_id
         }
         .set { ch_climbids }
-    ch_samples = Channel
-    .fromPath(params.input, checkIfExists: true)
-    .splitCsv(header: true, strip: true)
 
-    ch_samples.view()
-// [sample:S1, fastq_1:/data/S1_R1.fq.gz, fastq_2:/data/S1_R2.fq.gz, ...]
-    //ORANGE_BOX(ch_climbids, params.outdir, params.server, params.bucket, params.profiles_json, params.taxaplease_db)
+    ORANGE_BOX(ch_climbids, params.outdir, params.server, params.bucket, params.profiles_json, params.taxaplease_db)
 }

@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-18 v.1.0.4 - Orange Box
+Merging feat/samplesheet with pre-production branch
+
+### Changes:
+- Combined READMEs
+-
+
 v.1.0.0 - Orange Box
 Functioning first release with Claspar and QC modules, and option to run locally without
 pushing to Onyx.
