@@ -4,6 +4,7 @@ Merging refactor/unclassified-qc with pre-production branch
 
 ### Changes:
 - Now handles all sample metadata as a channel
+- Outdir is called directly as a param, not passed through workflows/processes
 
 ### Added:
 - Unclassified-qc processes
