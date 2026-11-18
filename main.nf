@@ -10,6 +10,10 @@ workflow {
     else{
         exit(1, "Please specify a --samplesheet")
     }
+    if (!params.skip_onyx_upload && !params.bucket){
+        exit(1, "Please specify a --bucket, or pass --skip_onyx_upload to run without Onyx/S3 uploads")
+    }
+
     samplesheet_ch.view()
     //  split samplesheet CSV into channels
     samples = samplesheet_ch.splitCsv(header: true, quote: '\"')
@@ -19,5 +23,5 @@ workflow {
         }
         .set { ch_climbids }
 
-    ORANGE_BOX(ch_climbids, params.outdir, params.server, params.bucket, params.profile_tables, params.taxaplease_db)
+    ORANGE_BOX(ch_climbids, params.outdir, params.server, params.bucket, params.profiles_json, params.taxaplease_db)
 }
