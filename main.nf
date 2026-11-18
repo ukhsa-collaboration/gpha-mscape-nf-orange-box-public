@@ -16,7 +16,7 @@ workflow {
         exit(1, "Please specify a --bucket, or pass --skip_onyx_upload to run without Onyx/S3 uploads")
     }
 
-    sample_ch.view
+    sample_ch.view()
 
     ORANGE_BOX(sample_ch, params.outdir, params.server, params.bucket, params.profiles_json, params.taxaplease_db)
 }
