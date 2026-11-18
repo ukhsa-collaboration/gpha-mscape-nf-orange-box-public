@@ -5,7 +5,14 @@ Merging feat/samplesheet with pre-production branch
 
 ### Changes:
 - Combined READMEs
--
+- Renamed funnel to onyx_upload_processes
+
+### Removed:
+- PORTAL process as nf handles aggregation
+- QC and CLASPAR subworkflows as they only call a single process
+- Python scripts in bin (no longer used)
+- Tests no longer used
+
 
 v.1.0.0 - Orange Box
 Functioning first release with Claspar and QC modules, and option to run locally without
