@@ -23,5 +23,11 @@ workflow {
         }
         .set { ch_climbids }
 
-    ORANGE_BOX(ch_climbids, params.outdir, params.server, params.bucket, params.profiles_json, params.taxaplease_db)
+    ch_samples = Channel
+        .fromPath(params.samplesheet, checkIfExists: true)
+        .splitCsv(header: true, strip: true)
+
+    ch_samples.view()
+
+    // ORANGE_BOX(ch_climbids, params.outdir, params.server, params.bucket, params.profiles_json, params.taxaplease_db)
 }
