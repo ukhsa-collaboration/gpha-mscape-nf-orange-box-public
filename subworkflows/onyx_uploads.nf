@@ -55,33 +55,33 @@ workflow ONYX_UPLOADS {
 
     main:
     // QC
-    FOW__QC(sample_ch.climb_id, "QC", qc_analysis_json, server, bucket)
-    S3U__QC(sample_ch.climb_id, "QC", server, bucket, FOW__QC.out.temp_analysis_id_file, qc_upload_files)
-    FOU__QC(sample_ch.climb_id, "QC", qc_analysis_json, server, bucket, FOW__QC.out.temp_analysis_id_file, S3U__QC.out.s3_location_json)
+    FOW__QC(sample_ch, "QC", qc_analysis_json, server, bucket)
+    S3U__QC(sample_ch, "QC", server, bucket, FOW__QC.out.temp_analysis_id_file, qc_upload_files)
+    FOU__QC(sample_ch, "QC", qc_analysis_json, server, bucket, FOW__QC.out.temp_analysis_id_file, S3U__QC.out.s3_location_json)
 
     // ClasPar: viral aligner
-    FOW__CLASPAR_VIRALIGN(sample_ch.climb_id, "CLASPAR_VA", viralign_analysis_json, server, bucket)
-    S3U__CLASPAR_VIRALIGN(sample_ch.climb_id, "CLASPAR_VA", server, bucket, FOW__CLASPAR_VIRALIGN.out.temp_analysis_id_file, viralign_upload_files)
-    FOU__CLASPAR_VIRALIGN(sample_ch.climb_id, "CLASPAR_VA", viralign_analysis_json, server, bucket, FOW__CLASPAR_VIRALIGN.out.temp_analysis_id_file, S3U__CLASPAR_VIRALIGN.out.s3_location_json)
+    FOW__CLASPAR_VIRALIGN(sample_ch, "CLASPAR_VA", viralign_analysis_json, server, bucket)
+    S3U__CLASPAR_VIRALIGN(sample_ch, "CLASPAR_VA", server, bucket, FOW__CLASPAR_VIRALIGN.out.temp_analysis_id_file, viralign_upload_files)
+    FOU__CLASPAR_VIRALIGN(sample_ch, "CLASPAR_VA", viralign_analysis_json, server, bucket, FOW__CLASPAR_VIRALIGN.out.temp_analysis_id_file, S3U__CLASPAR_VIRALIGN.out.s3_location_json)
 
     // ClasPar: kraken
-    FOW__CLASPAR_KRAKEN(sample_ch.climb_id, "CLASPAR_KRAKEN", kraken_analysis_json, server, bucket)
-    S3U__CLASPAR_KRAKEN(sample_ch.climb_id, "CLASPAR_KRAKEN", server, bucket, FOW__CLASPAR_KRAKEN.out.temp_analysis_id_file, kraken_upload_files)
-    FOU__CLASPAR_KRAKEN(sample_ch.climb_id, "CLASPAR_KRAKEN", kraken_analysis_json, server, bucket, FOW__CLASPAR_KRAKEN.out.temp_analysis_id_file, S3U__CLASPAR_KRAKEN.out.s3_location_json)
+    FOW__CLASPAR_KRAKEN(sample_ch, "CLASPAR_KRAKEN", kraken_analysis_json, server, bucket)
+    S3U__CLASPAR_KRAKEN(sample_ch, "CLASPAR_KRAKEN", server, bucket, FOW__CLASPAR_KRAKEN.out.temp_analysis_id_file, kraken_upload_files)
+    FOU__CLASPAR_KRAKEN(sample_ch, "CLASPAR_KRAKEN", kraken_analysis_json, server, bucket, FOW__CLASPAR_KRAKEN.out.temp_analysis_id_file, S3U__CLASPAR_KRAKEN.out.s3_location_json)
 
     // ClasPar: sylph
-    FOW__CLASPAR_SYLPH(sample_ch.climb_id, "CLASPAR_SYLPH", sylph_analysis_json, server, bucket)
-    S3U__CLASPAR_SYLPH(sample_ch.climb_id, "CLASPAR_SYLPH", server, bucket, FOW__CLASPAR_SYLPH.out.temp_analysis_id_file, sylph_upload_files)
-    FOU__CLASPAR_SYLPH(sample_ch.climb_id, "CLASPAR_SYLPH", sylph_analysis_json, server, bucket, FOW__CLASPAR_SYLPH.out.temp_analysis_id_file, S3U__CLASPAR_SYLPH.out.s3_location_json)
+    FOW__CLASPAR_SYLPH(sample_ch, "CLASPAR_SYLPH", sylph_analysis_json, server, bucket)
+    S3U__CLASPAR_SYLPH(sample_ch, "CLASPAR_SYLPH", server, bucket, FOW__CLASPAR_SYLPH.out.temp_analysis_id_file, sylph_upload_files)
+    FOU__CLASPAR_SYLPH(sample_ch, "CLASPAR_SYLPH", sylph_analysis_json, server, bucket, FOW__CLASPAR_SYLPH.out.temp_analysis_id_file, S3U__CLASPAR_SYLPH.out.s3_location_json)
 
     // Unclassified QC
-    FOW__UNCLASS_QC(sample_ch.climb_id, "UNCLASS_QC", unclass_qc_analysis_json, server, bucket)
-    S3U__UNCLASS_QC(sample_ch.climb_id, "UNCLASS_QC", server, bucket, FOW__UNCLASS_QC.out.temp_analysis_id_file, unclass_qc_upload_files)
-    FOU__UNCLASS_QC(sample_ch.climb_id, "UNCLASS_QC", unclass_qc_analysis_json, server, bucket, FOW__UNCLASS_QC.out.temp_analysis_id_file, S3U__UNCLASS_QC.out.s3_location_json)
+    FOW__UNCLASS_QC(sample_ch, "UNCLASS_QC", unclass_qc_analysis_json, server, bucket)
+    S3U__UNCLASS_QC(sample_ch, "UNCLASS_QC", server, bucket, FOW__UNCLASS_QC.out.temp_analysis_id_file, unclass_qc_upload_files)
+    FOU__UNCLASS_QC(sample_ch, "UNCLASS_QC", unclass_qc_analysis_json, server, bucket, FOW__UNCLASS_QC.out.temp_analysis_id_file, S3U__UNCLASS_QC.out.s3_location_json)
 
     // Publish once every analysis has been written to Onyx and S3.
     PUBLISH_ONYX(
-        sample_ch.climb_id,
+        sample_ch,
         server,
         FOU__QC.out.analysis_id_file,
         FOU__CLASPAR_VIRALIGN.out.analysis_id_file,
