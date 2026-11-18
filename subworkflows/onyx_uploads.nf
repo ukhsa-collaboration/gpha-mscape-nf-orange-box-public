@@ -7,23 +7,23 @@
         - Called from workflows/orange_box.nf unless --skip_onyx_upload is set.
 */
 
-include { PUBLISH_ONYX }                                 from "../modules/funnel_processes.nf"
+include { PUBLISH_ONYX }                                 from "../modules/onyx_upload_processes.nf"
 
-include { FIRST_ONYX_WRITE  as FOW__QC }                 from "../modules/funnel_processes.nf"
-include { S3_UPLOAD         as S3U__QC }                 from "../modules/funnel_processes.nf"
-include { FINAL_ONYX_UPDATE as FOU__QC }                 from "../modules/funnel_processes.nf"
+include { FIRST_ONYX_WRITE  as FOW__QC }                 from "../modules/onyx_upload_processes.nf"
+include { S3_UPLOAD         as S3U__QC }                 from "../modules/onyx_upload_processes.nf"
+include { FINAL_ONYX_UPDATE as FOU__QC }                 from "../modules/onyx_upload_processes.nf"
 
-include { FIRST_ONYX_WRITE  as FOW__CLASPAR_VIRALIGN }   from "../modules/funnel_processes.nf"
-include { S3_UPLOAD         as S3U__CLASPAR_VIRALIGN }   from "../modules/funnel_processes.nf"
-include { FINAL_ONYX_UPDATE as FOU__CLASPAR_VIRALIGN }   from "../modules/funnel_processes.nf"
+include { FIRST_ONYX_WRITE  as FOW__CLASPAR_VIRALIGN }   from "../modules/onyx_upload_processes.nf"
+include { S3_UPLOAD         as S3U__CLASPAR_VIRALIGN }   from "../modules/onyx_upload_processes.nf"
+include { FINAL_ONYX_UPDATE as FOU__CLASPAR_VIRALIGN }   from "../modules/onyx_upload_processes.nf"
 
-include { FIRST_ONYX_WRITE  as FOW__CLASPAR_KRAKEN }     from "../modules/funnel_processes.nf"
-include { S3_UPLOAD         as S3U__CLASPAR_KRAKEN }     from "../modules/funnel_processes.nf"
-include { FINAL_ONYX_UPDATE as FOU__CLASPAR_KRAKEN }     from "../modules/funnel_processes.nf"
+include { FIRST_ONYX_WRITE  as FOW__CLASPAR_KRAKEN }     from "../modules/onyx_upload_processes.nf"
+include { S3_UPLOAD         as S3U__CLASPAR_KRAKEN }     from "../modules/onyx_upload_processes.nf"
+include { FINAL_ONYX_UPDATE as FOU__CLASPAR_KRAKEN }     from "../modules/onyx_upload_processes.nf"
 
-include { FIRST_ONYX_WRITE  as FOW__CLASPAR_SYLPH }      from "../modules/funnel_processes.nf"
-include { S3_UPLOAD         as S3U__CLASPAR_SYLPH }      from "../modules/funnel_processes.nf"
-include { FINAL_ONYX_UPDATE as FOU__CLASPAR_SYLPH }      from "../modules/funnel_processes.nf"
+include { FIRST_ONYX_WRITE  as FOW__CLASPAR_SYLPH }      from "../modules/onyx_upload_processes.nf"
+include { S3_UPLOAD         as S3U__CLASPAR_SYLPH }      from "../modules/onyx_upload_processes.nf"
+include { FINAL_ONYX_UPDATE as FOU__CLASPAR_SYLPH }      from "../modules/onyx_upload_processes.nf"
 
 
 workflow ONYX_UPLOADS {
