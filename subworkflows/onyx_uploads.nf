@@ -46,10 +46,6 @@ workflow ONYX_UPLOADS {
     sylph_upload_files
 
     main:
-    // Wait for every module's analysis_fields.json before any funnel process starts.
-    PORTAL(climb_id, qc_analysis_json, viralign_analysis_json, kraken_analysis_json, sylph_analysis_json)
-    ready_to_go = PORTAL.out.ready_to_go
-
     // QC
     FOW__QC(climb_id, "QC", qc_analysis_json, server, bucket, ready_to_go)
     S3U__QC(climb_id, "QC", server, bucket, FOW__QC.out.temp_analysis_id_file, qc_upload_files)
