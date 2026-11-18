@@ -7,7 +7,7 @@
         - Called from workflows/orange_box.nf unless --skip_onyx_upload is set.
 */
 
-include { PUBLISH_ONYX }                                 from "../modules/onyx_upload_processes.nf"
+include { PUBLISH_ONYX                               }   from "../modules/onyx_upload_processes.nf"
 
 include { FIRST_ONYX_WRITE  as FOW__QC }                 from "../modules/onyx_upload_processes.nf"
 include { S3_UPLOAD         as S3U__QC }                 from "../modules/onyx_upload_processes.nf"
@@ -17,13 +17,17 @@ include { FIRST_ONYX_WRITE  as FOW__CLASPAR_VIRALIGN }   from "../modules/onyx_u
 include { S3_UPLOAD         as S3U__CLASPAR_VIRALIGN }   from "../modules/onyx_upload_processes.nf"
 include { FINAL_ONYX_UPDATE as FOU__CLASPAR_VIRALIGN }   from "../modules/onyx_upload_processes.nf"
 
-include { FIRST_ONYX_WRITE  as FOW__CLASPAR_KRAKEN }     from "../modules/onyx_upload_processes.nf"
-include { S3_UPLOAD         as S3U__CLASPAR_KRAKEN }     from "../modules/onyx_upload_processes.nf"
-include { FINAL_ONYX_UPDATE as FOU__CLASPAR_KRAKEN }     from "../modules/onyx_upload_processes.nf"
+include { FIRST_ONYX_WRITE  as FOW__CLASPAR_KRAKEN   }     from "../modules/onyx_upload_processes.nf"
+include { S3_UPLOAD         as S3U__CLASPAR_KRAKEN   }     from "../modules/onyx_upload_processes.nf"
+include { FINAL_ONYX_UPDATE as FOU__CLASPAR_KRAKEN   }     from "../modules/onyx_upload_processes.nf"
 
-include { FIRST_ONYX_WRITE  as FOW__CLASPAR_SYLPH }      from "../modules/onyx_upload_processes.nf"
-include { S3_UPLOAD         as S3U__CLASPAR_SYLPH }      from "../modules/onyx_upload_processes.nf"
-include { FINAL_ONYX_UPDATE as FOU__CLASPAR_SYLPH }      from "../modules/onyx_upload_processes.nf"
+include { FIRST_ONYX_WRITE  as FOW__CLASPAR_SYLPH   }      from "../modules/onyx_upload_processes.nf"
+include { S3_UPLOAD         as S3U__CLASPAR_SYLPH   }      from "../modules/onyx_upload_processes.nf"
+include { FINAL_ONYX_UPDATE as FOU__CLASPAR_SYLPH   }      from "../modules/onyx_upload_processes.nf"
+
+include { FIRST_ONYX_WRITE  as FOW__UNCLASS_QC      }      from "../modules/onyx_upload_processes.nf"
+include { S3_UPLOAD         as S3U__UNCLASS_QC      }      from "../modules/onyx_upload_processes.nf"
+include { FINAL_ONYX_UPDATE as FOU__UNCLASS_QC      }      from "../modules/onyx_upload_processes.nf"
 
 
 workflow ONYX_UPLOADS {
@@ -44,6 +48,10 @@ workflow ONYX_UPLOADS {
     kraken_upload_files
     sylph_analysis_json
     sylph_upload_files
+
+    // Unclassified QC_SAMPLE outputs
+    unclass_qc_analysis_json
+    unclass_qc_upload_files
 
     main:
     // QC
@@ -66,6 +74,11 @@ workflow ONYX_UPLOADS {
     S3U__CLASPAR_SYLPH(climb_id, "CLASPAR_SYLPH", server, bucket, FOW__CLASPAR_SYLPH.out.temp_analysis_id_file, sylph_upload_files)
     FOU__CLASPAR_SYLPH(climb_id, "CLASPAR_SYLPH", sylph_analysis_json, server, bucket, FOW__CLASPAR_SYLPH.out.temp_analysis_id_file, S3U__CLASPAR_SYLPH.out.s3_location_json)
 
+    // Unclassified QC
+    FOW__UNCLASS_QC(climb_id, "UNCLASS_QC", unclass_qc_analysis_json, server, bucket)
+    S3U__UNCLASS_QC(climb_id, "UNCLASS_QC", server, bucket, FOW__UNCLASS_QC.out.temp_analysis_id_file, unclass_qc_upload_files)
+    FOU__UNCLASS_QC(climb_id, "UNCLASS_QC", unclass_qc_analysis_json, server, bucket, FOW__UNCLASS_QC.out.temp_analysis_id_file, S3U__UNCLASS_QC.out.s3_location_json)
+
     // Publish once every analysis has been written to Onyx and S3.
     PUBLISH_ONYX(
         climb_id,
@@ -73,7 +86,8 @@ workflow ONYX_UPLOADS {
         FOU__QC.out.analysis_id_file,
         FOU__CLASPAR_VIRALIGN.out.analysis_id_file,
         FOU__CLASPAR_KRAKEN.out.analysis_id_file,
-        FOU__CLASPAR_SYLPH.out.analysis_id_file
+        FOU__CLASPAR_SYLPH.out.analysis_id_file,
+        FOU__UNCLASS_QC.out.analysis_id_file,
     )
 
     emit:
@@ -83,4 +97,5 @@ workflow ONYX_UPLOADS {
         .mix(FOW__CLASPAR_VIRALIGN.out.funnel_logs, S3U__CLASPAR_VIRALIGN.out.funnel_logs, FOU__CLASPAR_VIRALIGN.out.funnel_logs)
         .mix(FOW__CLASPAR_KRAKEN.out.funnel_logs, S3U__CLASPAR_KRAKEN.out.funnel_logs, FOU__CLASPAR_KRAKEN.out.funnel_logs)
         .mix(FOW__CLASPAR_SYLPH.out.funnel_logs, S3U__CLASPAR_SYLPH.out.funnel_logs, FOU__CLASPAR_SYLPH.out.funnel_logs)
+        .mix(S3U__UNCLASS_QC.out.funnel_logs, FOU__UNCLASS_QC.out.funnel_logs)
 }
