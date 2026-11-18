@@ -23,7 +23,8 @@ workflow {
         }
         .set { ch_climbids }
 
-    ch_meta = samples.map { row -> row }   // whole row is the meta map
+    ch_meta = samplesheet_ch.splitCsv(header: true, quote: '\"')
+        .map { row -> row }   // whole row is the meta map
 
     ch_meta.view()
 
