@@ -1,9 +1,6 @@
-#!/usr/bin/env nextflow
-
 include { QC_SAMPLE    }              from "../modules/qc_metrics.nf"
 include { CLASPAR      }              from "../modules/claspar.nf"
 include { ONYX_UPLOADS }              from "../subworkflows/onyx_uploads.nf"
-
 
 workflow ORANGE_BOX {
 

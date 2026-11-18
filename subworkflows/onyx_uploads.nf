@@ -2,29 +2,28 @@
 
 /*
     ONYX_UPLOADS subworkflow
-        - Takes the outputs of the QC_SAMPLE and CLASPAR modules and pushes them through the Onyx/S3 funnel:
+        - Takes the outputs of analysees and pushes them through the Onyx/S3 funnel:
           PORTAL -> FIRST_ONYX_WRITE -> S3_UPLOAD -> FINAL_ONYX_UPDATE (per analysis) -> PUBLISH_ONYX.
         - Called from workflows/orange_box.nf unless --skip_onyx_upload is set.
 */
 
-include { PORTAL }                                       from "../modules/funnel_processes.nf"
-include { PUBLISH_ONYX }                                 from "../modules/funnel_processes.nf"
+include { PUBLISH_ONYX }                                 from "../modules/onyx_upload_processes.nf"
 
-include { FIRST_ONYX_WRITE  as FOW__QC }                 from "../modules/funnel_processes.nf"
-include { S3_UPLOAD         as S3U__QC }                 from "../modules/funnel_processes.nf"
-include { FINAL_ONYX_UPDATE as FOU__QC }                 from "../modules/funnel_processes.nf"
+include { FIRST_ONYX_WRITE  as FOW__QC }                 from "../modules/onyx_upload_processes.nf"
+include { S3_UPLOAD         as S3U__QC }                 from "../modules/onyx_upload_processes.nf"
+include { FINAL_ONYX_UPDATE as FOU__QC }                 from "../modules/onyx_upload_processes.nf"
 
-include { FIRST_ONYX_WRITE  as FOW__CLASPAR_VIRALIGN }   from "../modules/funnel_processes.nf"
-include { S3_UPLOAD         as S3U__CLASPAR_VIRALIGN }   from "../modules/funnel_processes.nf"
-include { FINAL_ONYX_UPDATE as FOU__CLASPAR_VIRALIGN }   from "../modules/funnel_processes.nf"
+include { FIRST_ONYX_WRITE  as FOW__CLASPAR_VIRALIGN }   from "../modules/onyx_upload_processes.nf"
+include { S3_UPLOAD         as S3U__CLASPAR_VIRALIGN }   from "../modules/onyx_upload_processes.nf"
+include { FINAL_ONYX_UPDATE as FOU__CLASPAR_VIRALIGN }   from "../modules/onyx_upload_processes.nf"
 
-include { FIRST_ONYX_WRITE  as FOW__CLASPAR_KRAKEN }     from "../modules/funnel_processes.nf"
-include { S3_UPLOAD         as S3U__CLASPAR_KRAKEN }     from "../modules/funnel_processes.nf"
-include { FINAL_ONYX_UPDATE as FOU__CLASPAR_KRAKEN }     from "../modules/funnel_processes.nf"
+include { FIRST_ONYX_WRITE  as FOW__CLASPAR_KRAKEN }     from "../modules/onyx_upload_processes.nf"
+include { S3_UPLOAD         as S3U__CLASPAR_KRAKEN }     from "../modules/onyx_upload_processes.nf"
+include { FINAL_ONYX_UPDATE as FOU__CLASPAR_KRAKEN }     from "../modules/onyx_upload_processes.nf"
 
-include { FIRST_ONYX_WRITE  as FOW__CLASPAR_SYLPH }      from "../modules/funnel_processes.nf"
-include { S3_UPLOAD         as S3U__CLASPAR_SYLPH }      from "../modules/funnel_processes.nf"
-include { FINAL_ONYX_UPDATE as FOU__CLASPAR_SYLPH }      from "../modules/funnel_processes.nf"
+include { FIRST_ONYX_WRITE  as FOW__CLASPAR_SYLPH }      from "../modules/onyx_upload_processes.nf"
+include { S3_UPLOAD         as S3U__CLASPAR_SYLPH }      from "../modules/onyx_upload_processes.nf"
+include { FINAL_ONYX_UPDATE as FOU__CLASPAR_SYLPH }      from "../modules/onyx_upload_processes.nf"
 
 
 workflow ONYX_UPLOADS {
@@ -47,27 +46,23 @@ workflow ONYX_UPLOADS {
     sylph_upload_files
 
     main:
-    // Wait for every module's analysis_fields.json before any funnel process starts.
-    PORTAL(climb_id, qc_analysis_json, viralign_analysis_json, kraken_analysis_json, sylph_analysis_json)
-    ready_to_go = PORTAL.out.ready_to_go
-
     // QC
-    FOW__QC(climb_id, "QC", qc_analysis_json, server, bucket, ready_to_go)
+    FOW__QC(climb_id, "QC", qc_analysis_json, server, bucket)
     S3U__QC(climb_id, "QC", server, bucket, FOW__QC.out.temp_analysis_id_file, qc_upload_files)
     FOU__QC(climb_id, "QC", qc_analysis_json, server, bucket, FOW__QC.out.temp_analysis_id_file, S3U__QC.out.s3_location_json)
 
     // ClasPar: viral aligner
-    FOW__CLASPAR_VIRALIGN(climb_id, "CLASPAR_VA", viralign_analysis_json, server, bucket, ready_to_go)
+    FOW__CLASPAR_VIRALIGN(climb_id, "CLASPAR_VA", viralign_analysis_json, server, bucket)
     S3U__CLASPAR_VIRALIGN(climb_id, "CLASPAR_VA", server, bucket, FOW__CLASPAR_VIRALIGN.out.temp_analysis_id_file, viralign_upload_files)
     FOU__CLASPAR_VIRALIGN(climb_id, "CLASPAR_VA", viralign_analysis_json, server, bucket, FOW__CLASPAR_VIRALIGN.out.temp_analysis_id_file, S3U__CLASPAR_VIRALIGN.out.s3_location_json)
 
     // ClasPar: kraken
-    FOW__CLASPAR_KRAKEN(climb_id, "CLASPAR_KRAKEN", kraken_analysis_json, server, bucket, ready_to_go)
+    FOW__CLASPAR_KRAKEN(climb_id, "CLASPAR_KRAKEN", kraken_analysis_json, server, bucket)
     S3U__CLASPAR_KRAKEN(climb_id, "CLASPAR_KRAKEN", server, bucket, FOW__CLASPAR_KRAKEN.out.temp_analysis_id_file, kraken_upload_files)
     FOU__CLASPAR_KRAKEN(climb_id, "CLASPAR_KRAKEN", kraken_analysis_json, server, bucket, FOW__CLASPAR_KRAKEN.out.temp_analysis_id_file, S3U__CLASPAR_KRAKEN.out.s3_location_json)
 
     // ClasPar: sylph
-    FOW__CLASPAR_SYLPH(climb_id, "CLASPAR_SYLPH", sylph_analysis_json, server, bucket, ready_to_go)
+    FOW__CLASPAR_SYLPH(climb_id, "CLASPAR_SYLPH", sylph_analysis_json, server, bucket)
     S3U__CLASPAR_SYLPH(climb_id, "CLASPAR_SYLPH", server, bucket, FOW__CLASPAR_SYLPH.out.temp_analysis_id_file, sylph_upload_files)
     FOU__CLASPAR_SYLPH(climb_id, "CLASPAR_SYLPH", sylph_analysis_json, server, bucket, FOW__CLASPAR_SYLPH.out.temp_analysis_id_file, S3U__CLASPAR_SYLPH.out.s3_location_json)
 
