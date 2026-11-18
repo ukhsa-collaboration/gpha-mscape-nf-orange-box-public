@@ -1,5 +1,6 @@
 #!/usr/bin/env nextflow
-include { FASTQ_READ_STATS } from "../modules/unclassified_qc.nf"
+include { FASTQ_READ_STATS        } from "../modules/unclassified_qc.nf"
+include { CREATE_READQC_ONYX_JSON } from "../modules/unclassified_qc.nf"
 
 workflow UNCLASSIFIED_QC_ANALYSIS {
 
