@@ -23,7 +23,7 @@ workflow {
         }
         .set { ch_climbids }
 
-    ch_meta = samplesheet.map { row -> row }   // whole row is the meta map
+    ch_meta = params.samplesheet.map { row -> row }   // whole row is the meta map
 
     ch_meta.view()
 
