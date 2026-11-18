@@ -10,8 +10,7 @@ process QC_SAMPLE {
 
         Inputs:
             - climb_id: Climb ID for a given sample
-            - output_dir: Directory to write results to
-
+            - Server: server to query onyx on
         Outputs:
             - exit_code: Exit status for the program.
             - result_file: Path to the onyx analysis json file.
