@@ -82,7 +82,6 @@ process CREATE_READQC_ONYX_JSON {
     script:
     """
     create_onyx_json \\
-        --store-onyx \\
         -i ${ch_meta.climb_id} \\
         -s ${server} \\
         -o . \\
