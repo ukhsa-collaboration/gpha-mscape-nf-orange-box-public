@@ -12,13 +12,13 @@ workflow UNCLASSIFIED_QC_ANALYSIS {
 
     // meta -> tuple(meta, [read1, read2?]); rows with no unclassified reads are dropped
     ch_reads = ch_meta
-        .map { meta ->
+        .map { ch_meta ->
             def reads = [meta.unclassified_reads_1, meta.unclassified_reads_2]
                 .findAll { it }
                 .collect { file(it) }
-            tuple(meta, reads)
+            tuple(ch_meta, reads)
         }
-        .filter { meta, reads -> reads }
+        .filter { ch_meta, reads -> reads }
 
     ch_reads.view()
 
