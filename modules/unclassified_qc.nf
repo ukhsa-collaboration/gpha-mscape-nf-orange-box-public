@@ -67,7 +67,7 @@ process CREATE_READQC_ONYX_JSON {
             - csv: Path to the output statistics table.
     */
 
-    container 'ghcr.io/ukhsa-collaboration/gpha-mscape-fastq-read-stats:1.0.0'
+    container 'ghcr.io/ukhsa-collaboration/gpha-mscape-fastq-read-stats:latest'
     label "process_low"
     tag "${ch_meta.climb_id}"
     publishDir "${params.outdir}", mode: 'copy'
@@ -81,7 +81,7 @@ process CREATE_READQC_ONYX_JSON {
     tuple path("${ch_meta.climb_id}.unclassified.readQC.analysis_fields.log.txt"), path(stats_list), emit: upload_files
     script:
     """
-        create_onyx_json.py \\
+    create_onyx_json \\
         --store-onyx \\
         -i ${ch_meta.climb_id} \\
         -s ${server} \\
