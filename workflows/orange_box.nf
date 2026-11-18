@@ -27,7 +27,7 @@ workflow ORANGE_BOX {
     }
     else {
         ONYX_UPLOADS(
-            climb_id,
+            sample_ch.climb_id,
             server,
             bucket,
             QC_SAMPLE.out.analysis_json,
