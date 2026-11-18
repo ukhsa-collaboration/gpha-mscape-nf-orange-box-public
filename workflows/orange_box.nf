@@ -9,6 +9,7 @@ workflow ORANGE_BOX {
 
     take:
     climb_id
+    meta
     out_dir
     server
     bucket
@@ -20,7 +21,7 @@ workflow ORANGE_BOX {
     // Run on All samples subworkflow
     QC_SAMPLE(climb_id, out_dir, server)
     CLASPAR(climb_id, server, profiles_json, taxaplease)
-    UNCLASSIFIED_QC_ANALYSIS(samplesheet, server, outdir)
+    UNCLASSIFIED_QC_ANALYSIS(meta, server, outdir)
 
     if (params.skip_onyx_upload) {
         log.info "skip_onyx_upload is set: QC and ClasPar results will not be written to Onyx or uploaded to S3."

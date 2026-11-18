@@ -5,7 +5,7 @@ include { CREATE_READQC_ONYX_JSON } from "../modules/unclassified_qc.nf"
 workflow UNCLASSIFIED_QC_ANALYSIS {
 
     take:
-    samplesheet
+    meta
     server
     outdir
 
