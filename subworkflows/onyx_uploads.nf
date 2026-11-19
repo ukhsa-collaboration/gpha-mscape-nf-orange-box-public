@@ -21,13 +21,13 @@ include { FIRST_ONYX_WRITE  as FOW__CLASPAR_KRAKEN   }     from "../modules/onyx
 include { S3_UPLOAD         as S3U__CLASPAR_KRAKEN   }     from "../modules/onyx_upload_processes.nf"
 include { FINAL_ONYX_UPDATE as FOU__CLASPAR_KRAKEN   }     from "../modules/onyx_upload_processes.nf"
 
-include { FIRST_ONYX_WRITE  as FOW__CLASPAR_SYLPH   }      from "../modules/onyx_upload_processes.nf"
-include { S3_UPLOAD         as S3U__CLASPAR_SYLPH   }      from "../modules/onyx_upload_processes.nf"
-include { FINAL_ONYX_UPDATE as FOU__CLASPAR_SYLPH   }      from "../modules/onyx_upload_processes.nf"
+include { FIRST_ONYX_WRITE  as FOW__CLASPAR_SYLPH    }      from "../modules/onyx_upload_processes.nf"
+include { S3_UPLOAD         as S3U__CLASPAR_SYLPH    }      from "../modules/onyx_upload_processes.nf"
+include { FINAL_ONYX_UPDATE as FOU__CLASPAR_SYLPH    }      from "../modules/onyx_upload_processes.nf"
 
-include { FIRST_ONYX_WRITE  as FOW__UNCLASS_QC      }      from "../modules/onyx_upload_processes.nf"
-include { S3_UPLOAD         as S3U__UNCLASS_QC      }      from "../modules/onyx_upload_processes.nf"
-include { FINAL_ONYX_UPDATE as FOU__UNCLASS_QC      }      from "../modules/onyx_upload_processes.nf"
+include { FIRST_ONYX_WRITE  as FOW__UNCLASS_QC       }      from "../modules/onyx_upload_processes.nf"
+include { S3_UPLOAD         as S3U__UNCLASS_QC       }      from "../modules/onyx_upload_processes.nf"
+include { FINAL_ONYX_UPDATE as FOU__UNCLASS_QC       }      from "../modules/onyx_upload_processes.nf"
 
 
 workflow ONYX_UPLOADS {
