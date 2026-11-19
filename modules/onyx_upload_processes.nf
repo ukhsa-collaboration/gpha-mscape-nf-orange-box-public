@@ -14,7 +14,7 @@ process FIRST_ONYX_WRITE {
     */
     container 'ghcr.io/ukhsa-collaboration/gpha-mscape-onyx-analysis-helper:latest'
     label "process_single"
-    tag "Funnelling ${sample_ch.climb_id} Orange Box analyses: FirstWriteToOnyx"
+    tag "${sample_ch.climb_id}"
     publishDir "$params.outdir/funnel", mode: "copy"
 
     errorStrategy { sleep(Math.pow(2, task.attempt) * 200 as long); return 'retry' }
@@ -33,7 +33,6 @@ process FIRST_ONYX_WRITE {
 
     script:
     """
-    echo '# # # # # starting funnel task: FirstWriteToOnyx'
     onyx_analysis write \
     --climbid $sample_ch.climb_id \
     --output . \
@@ -43,7 +42,6 @@ process FIRST_ONYX_WRITE {
     --orange-box-version ${workflow.manifest.version}
     mv ${sample_ch.climb_id}.onyx_analysis.write.analysis_id.txt ${sample_ch.climb_id}.${orange_box_module}.temp.analysis_id
     mv ${sample_ch.climb_id}.onyx_analysis.write.log.txt ${sample_ch.climb_id}.${orange_box_module}.FirstWriteToOnyx.Orange_Box_Onyx_S3_transfer_log.txt
-    echo '# # # # # finished funnel task: FirstWriteToOnyx'
     """
 }
 
@@ -62,7 +60,7 @@ process S3_UPLOAD {
     */
     container 'ghcr.io/ukhsa-collaboration/gpha-mscape-onyx-analysis-helper:latest'
     label "process_single"
-    tag "Funnelling ${sample_ch.climb_id} Orange Box analyses: S3Upload"
+    tag "${sample_ch.climb_id}"
     publishDir "$params.outdir/funnel", mode: "copy"
 
     errorStrategy { sleep(Math.pow(2, task.attempt) * 200 as long); return 'retry' }
@@ -75,7 +73,6 @@ process S3_UPLOAD {
     val bucket
     path "${sample_ch.climb_id}.${orange_box_module}.temp.analysis_id"
     path upload_files
-    // qc-specific...  path "${climb_id}_qc_results.json"
 
     output:
     path "${sample_ch.climb_id}.${orange_box_module}.s3_location.json", emit: s3_location_json
@@ -83,12 +80,9 @@ process S3_UPLOAD {
 
     script:
     """
-    echo '# # # # # starting funnel task: S3Upload'
 
-    echo '# # # # # parsing upload_files channel into CSV argument'
     COMMA_SEP_S3_FILES=`echo $upload_files | sed -r {'s/\s+/,/g'}`
 
-    echo '# # # # #   --input-files' \$COMMA_SEP_S3_FILES
 
     onyx_analysis s3_upload \
         --climbid $sample_ch.climb_id \
@@ -106,7 +100,6 @@ process S3_UPLOAD {
     ${sample_ch.climb_id}.onyx_analysis.s3_upload.log.txt \
     ${sample_ch.climb_id}.${orange_box_module}.S3Upload.Orange_Box_Onyx_S3_transfer_log.txt
 
-    echo '# # # # # finished funnel task: S3Upload'
     """
 }
 
@@ -125,7 +118,7 @@ process FINAL_ONYX_UPDATE {
     */
     container 'ghcr.io/ukhsa-collaboration/gpha-mscape-onyx-analysis-helper:latest'
     label "process_single"
-    tag "Funnelling ${sample_ch.climb_id} Orange Box analyses: FinalOnyxUpdate"
+    tag "${sample_ch.climb_id}"
     publishDir "$params.outdir/funnel", mode: "copy"
 
     errorStrategy { sleep(Math.pow(2, task.attempt) * 200 as long); return 'retry' }
@@ -146,7 +139,6 @@ process FINAL_ONYX_UPDATE {
 
     script:
     """
-    echo '# # # # # starting funnel task: FinalOnyxUpdate'
     onyx_analysis update \
     --climbid $sample_ch.climb_id \
     --output . \
@@ -158,7 +150,6 @@ process FINAL_ONYX_UPDATE {
     ${sample_ch.climb_id}.onyx_analysis.update.analysis_id.txt ${sample_ch.climb_id}.${orange_box_module}.analysis_id
     mv \
    ${sample_ch.climb_id}.onyx_analysis.update.log.txt ${sample_ch.climb_id}.${orange_box_module}.FinalOnyxUpdate.Orange_Box_Onyx_S3_transfer_log.txt
-    echo '# # # # # finished funnel task: FinalOnyxUpdate'
     """
 }
 
@@ -176,7 +167,7 @@ process PUBLISH_ONYX {
     */
     container 'ghcr.io/ukhsa-collaboration/gpha-mscape-onyx-analysis-helper:latest'
     label "process_single"
-    tag "Funnelling ${sample_ch.climb_id} Orange Box analyses: Publish to Onyx"
+    tag "${sample_ch.climb_id}"
     publishDir "$params.outdir/funnel", mode: "copy"
 
     errorStrategy { sleep(Math.pow(2, task.attempt) * 200 as long); return 'retry' }
@@ -202,7 +193,6 @@ process PUBLISH_ONYX {
 
    script:
     """
-    echo '# # # # # starting funnel publish step'
 
     for ANALYSIS_ID_FILE in \
         ${sample_ch.climb_id}.QC.analysis_id \
@@ -210,7 +200,6 @@ process PUBLISH_ONYX {
         ${sample_ch.climb_id}.CLASPAR_KRAKEN.analysis_id \
         ${sample_ch.climb_id}.CLASPAR_SYLPH.analysis_id
     do
-        echo "Publishing \$ANALYSIS_ID_FILE"
 
         onyx_analysis publish \
             --climbid $sample_ch.climb_id \
@@ -221,6 +210,5 @@ process PUBLISH_ONYX {
     done
     mv ${sample_ch.climb_id}.onyx_analysis.publish.log.txt ${sample_ch.climb_id}.Orange_Box_Onyx_publish_log.txt
 
-    echo '# # # # # finished funnel publish step'
 """
 }

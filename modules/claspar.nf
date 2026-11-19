@@ -21,7 +21,7 @@ process CLASPAR {
     publishDir "${params.outdir}/claspar", mode: "copy"
 
     input:
-    val(sample_ch)
+    val sample_ch
     val server
     path profiles_json
     path taxaplease
@@ -39,9 +39,6 @@ process CLASPAR {
 
     script:
     """
-    echo "Running ClasPar..."
     claspar -i $sample_ch.climb_id -o . -s $server -p $profiles_json -d $taxaplease
-
-    echo "Finished ClasPar."
     """
 }

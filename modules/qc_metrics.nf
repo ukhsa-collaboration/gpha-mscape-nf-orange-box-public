@@ -13,7 +13,11 @@ process QC_SAMPLE {
             - Server: server to query onyx on
         Outputs:
             - exit_code: Exit status for the program.
-            - result_file: Path to the onyx analysis json file.
+            - analysis_json: Path to the onyx analysis json file.
+            - upload_files: Output files to be uploaded to s3
+            - logs: Log file for the component
+             
+            
     */
     container 'ghcr.io/ukhsa-collaboration/gpha-mscape-sample-qc:latest'
     label "process_single"
