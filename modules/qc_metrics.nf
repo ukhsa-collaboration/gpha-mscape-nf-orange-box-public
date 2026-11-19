@@ -12,7 +12,6 @@ process QC_SAMPLE {
             - climb_id: Climb ID for a given sample
             - Server: server to query onyx on
         Outputs:
-            - exit_code: Exit status for the program.
             - analysis_json: Path to the onyx analysis json file.
             - upload_files: Output files to be uploaded to s3
             - logs: Log file for the component
