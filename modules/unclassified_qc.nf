@@ -60,11 +60,12 @@ process CREATE_READQC_ONYX_JSON {
             - climb_id: Climb ID for a given sample
             - readQC_status: Path to the file reporting process success
             - csv: Path to the output statistics table.
+            - server: Server code is running on
 
         Outputs:
-            - json_output: Analysis json table for upload into onyx.
+            - stats_summary: Analysis json containing unclassified QC stats summary for upload into onyx.
             - log: Log file.
-            - csv: Path to the output statistics table.
+            - stats_list: Path to csv containing the output statistics table.
     */
 
     container 'ghcr.io/ukhsa-collaboration/gpha-mscape-fastq-read-stats:latest'
