@@ -10,7 +10,6 @@ workflow UNCLASSIFIED_QC_ANALYSIS {
 
     main:
 
-    // meta -> tuple(meta, [read1, read2?]); rows with no unclassified reads are dropped
     ch_reads = ch_meta
         .map { ch_meta ->
             def reads = [ch_meta.unclassified_reads_1, ch_meta.unclassified_reads_2]

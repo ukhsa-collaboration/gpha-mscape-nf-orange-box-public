@@ -22,7 +22,7 @@ workflow ORANGE_BOX {
     UNCLASSIFIED_QC_ANALYSIS(sample_ch, server)
 
     if (params.skip_onyx_upload) {
-        log.info "skip_onyx_upload is set: QC and ClasPar results will not be written to Onyx or uploaded to S3."
+        log.info "skip_onyx_upload is set: Analysis results will not be written to Onyx or uploaded to S3."
     }
     else {
         ONYX_UPLOADS(
