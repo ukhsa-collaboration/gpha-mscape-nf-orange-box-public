@@ -1,6 +1,6 @@
 
 include { QC_METRICS               } from "../subworkflows/qc_metrics.nf"
-include { CLASPAR                  } from "../subworkflows/claspar.nf"
+include { CLASPAR_ANALYSIS         } from "../subworkflows/claspar.nf"
 // include { UNCLASSIFIED_QC_ANALYSIS } from "../subworkflows/unclassified_qc.nf"
 
 
@@ -13,7 +13,7 @@ workflow ORANGE_BOX_ANALYSES {
         // Run analyses
         // Run on All samples subworkflow
         QC_METRICS(sample_ch)
-        CLASPAR(sample_ch)
+        CLASPAR_ANALYSIS(sample_ch)
         // UNCLASSIFIED_QC_ANALYSIS(sample_ch, server)
 
         // Every analysis is reshaped to the same contract so ONYX_UPLOAD can treat them identically:
