@@ -10,7 +10,7 @@ workflow QC_METRICS {
         sample_ch
     main:
         QC_SAMPLE(sample_ch)
-        QC_SAMPLE.out.view()
+        QC_SAMPLE.out.qc_climb_id.view()
     emit:
         qc_climb_id = QC_SAMPLE.out.qc_climb_id
         analysis_json = QC_SAMPLE.out.analysis_json
