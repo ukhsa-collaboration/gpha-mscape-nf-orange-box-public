@@ -20,14 +20,14 @@ workflow {
     sample_ch.view()
 
     ORANGE_BOX_ANALYSES(sample_ch)
-    // if (params.onyx_upload) {
-    //         ch_results = Channel.empty().mix(
-    //             ANALYSIS.out.qc,
-    //             // ANALYSIS.out.kraken,
-    //             // ANALYSIS.out.viralign,
-    //             // ANALYSIS.out.sylph,
-    //             // ANALYSIS.out.unclassified
-    //         )
-    //         ONYX_UPLOAD(ch_results)
-    //     }
+    if (params.onyx_upload) {
+            ch_results = Channel.empty().mix(
+                ANALYSIS.out.qc,
+                // ANALYSIS.out.kraken,
+                // ANALYSIS.out.viralign,
+                // ANALYSIS.out.sylph,
+                // ANALYSIS.out.unclassified
+            )
+            ONYX_UPLOAD(ch_results)
+        }
 }

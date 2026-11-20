@@ -1,4 +1,4 @@
-include { QC_UPLOAD_PREP }              from "../subworkflows/onyx_qc_upload.nf"
+include { QC_METRICS_UPLOAD_PREP }              from "../subworkflows/onyx_qc_upload.nf"
 
 workflow ONYX_UPLOAD {
 
@@ -21,8 +21,13 @@ workflow ONYX_UPLOAD {
     // unclass_qc_upload_files
 
     main:
-    // QC
-    QC_UPLOAD_PREP(sample_ch, "QC", qc_analysis_json)
+    // QC METRICS
+    QC_METRICS_UPLOAD_PREP(sample_ch, "QC", qc_analysis_json)
+
+    // CLASPAR
+    // CLASPAR_VIRALIGN_UPLOAD_PREP(sample_ch, "CLASPAR_VA", analysis_json_viralign)
+    // CLASPAR_KRAKEN_UPLOAD_PREP(sample_ch, "CLASPAR_KRAKEN", analysis_json_kraken)
+    // CLASPAR_SYLPH_UPLOAD_PREP(sample_ch, "CLASPAR_SYLPH", analysis_json_sylph)
 
     // // ClasPar: viral aligner
     // FOW__CLASPAR_VIRALIGN(sample_ch, "CLASPAR_VA", viralign_analysis_json, server, bucket)

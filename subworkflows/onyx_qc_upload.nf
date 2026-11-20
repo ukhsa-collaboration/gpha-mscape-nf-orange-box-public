@@ -2,7 +2,7 @@ include { FIRST_ONYX_WRITE  }                 from "../modules/onyx_upload_proce
 include { S3_UPLOAD         }                 from "../modules/onyx_upload_processes.nf"
 include { FINAL_ONYX_UPDATE }                 from "../modules/onyx_upload_processes.nf"
 
-workflow QC_UPLOAD_PREP {
+workflow QC_METRICS_UPLOAD_PREP {
 
     take:
         sample_ch
