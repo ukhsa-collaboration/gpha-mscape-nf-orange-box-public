@@ -8,7 +8,7 @@ workflow ONYX_UPLOAD {
     main:
     // QC Metrics
     QC_MERTICS_ONYX_UPLOAD(
-        climb_id,
+        ch_results.sample_ch,
         ch_results.out.qc_metrics_analysis_json,
         ch_results.out.qc_metrics_upload_files
     )
