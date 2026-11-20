@@ -21,6 +21,10 @@ workflow {
 
     // Onyx uploads
     if (params.onyx_upload){
-        ONYX_UPLOAD(ORANGE_BOX_ANALYSES.out.results)
+        // Make sure all analyses are complete before doing anything with Onyx
+        ch_gated = ORANGE_BOX_ANALYSES.out.results
+        .collect(flat: false)   // waits until every analysis task in the run has finished
+        .flatMap { it }         // re-emits each tuple(meta, analysis_name, json, files)
+        ONYX_UPLOAD(ch_gated)
     }
 }
