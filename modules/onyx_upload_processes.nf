@@ -32,7 +32,7 @@ process FIRST_ONYX_WRITE {
         --output . \
         --server ${params.server} \
         --prod \
-        --input-json ${meta.climb_id}.${analysis_name}.analysis_fields.json \
+        --input-json ${analysis_json} \
         --orange-box-version ${workflow.manifest.version}
     mv ${meta.climb_id}.onyx_analysis.write.analysis_id.txt ${meta.climb_id}.${analysis_name}.temp.analysis_id
     mv ${meta.climb_id}.onyx_analysis.write.log.txt ${meta.climb_id}.${analysis_name}.FirstWriteToOnyx.Orange_Box_Onyx_S3_transfer_log.txt
