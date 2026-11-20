@@ -1,5 +1,5 @@
 
-include { QC_METRICS   }              from "../subworkflow/qc_metrics.nf"
+include { QC_METRICS   }              from "../subworkflows/qc_metrics.nf"
 include { CLASPAR      }              from "../modules/claspar.nf"
 // include { UNCLASSIFIED_QC_ANALYSIS } from "../subworkflows/unclassified_qc.nf"
 
