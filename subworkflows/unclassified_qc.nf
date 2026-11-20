@@ -18,8 +18,6 @@ workflow UNCLASSIFIED_QC_ANALYSIS {
          }
         .filter { _meta, reads -> reads }
 
-    ch_reads.view()
-
     FASTQ_READ_STATS(ch_reads)
 
     ch_readqc = FASTQ_READ_STATS.out.readQC
