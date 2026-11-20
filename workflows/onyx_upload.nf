@@ -8,14 +8,14 @@ workflow ONYX_UPLOAD {
     main:
     // 1. Create the Onyx analysis record (one task per sample x analysis)
     FIRST_ONYX_WRITE(
-        results.map { sample_ch, name, json, files -> tuple(meta, name, json) }
+        results.map { meta, name, json, files -> tuple(meta, name, json) }
     )
 
     // 2. Upload result files to S3. Join on [meta, analysis_name] so each temp
     //    analysis id is paired with its own sample's files, whatever order tasks finish in.
     S3_UPLOAD(
         FIRST_ONYX_WRITE.out.temp_analysis_id
-            .join(results.map { sample_ch, name, json, files -> tuple(meta, name, files) }, by: [0, 1])
+            .join(results.map { meta, name, json, files -> tuple(meta, name, files) }, by: [0, 1])
     )
 
      // 3. Write the S3 locations back to the Onyx record
