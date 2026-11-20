@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-process CLASPAR {
+process CLASPAR_PROCESS {
     /*
 	The process for running ClasPar.
 
