@@ -1,7 +1,7 @@
 #!/usr/bin/env nextflow
 
 include { ORANGE_BOX_ANALYSES   } from "./workflows/orange_box_analyses"
-// include { ONYX_UPLOAD } from "./workflows/onyx_upload"
+include { ONYX_UPLOAD } from "./workflows/onyx_upload"
 
 
 workflow {
@@ -17,7 +17,7 @@ workflow {
         exit(1, "Please specify a --bucket, or pass --skip_onyx_upload to run without Onyx/S3 uploads")
     }
 
-    sample_ch.view
+    sample_ch.view()
 
     ORANGE_BOX_ANALYSES(sample_ch, params.outdir, params.server, params.bucket, params.profiles_json, params.taxaplease_db)
     // if (params.onyx_upload) {
