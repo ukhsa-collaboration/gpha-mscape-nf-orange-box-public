@@ -17,9 +17,9 @@ workflow ORANGE_BOX_ANALYSES {
     // UNCLASSIFIED_QC_ANALYSIS(sample_ch, server)
 
 
-    // emit:
-    //     qc_metrics_analysis_json    = QC_METRICS.out.analysis_json
-    //     qc_metrics_upload_files     = QC_METRICS.out.upload_files
+    emit:
+        qc_metrics_analysis_json    = QC_METRICS.out.analysis_json
+        qc_metrics_upload_files     = QC_METRICS.out.upload_files
         // claspar_kraken       = CLASPAR.out.analysis_json_kraken
         // claspar_viralign     = CLASPAR.out.analysis_json_viralign
         // claspar_sylph        = CLASPAR.out.analysis_json_sylph
