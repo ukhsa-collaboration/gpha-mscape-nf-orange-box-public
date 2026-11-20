@@ -11,7 +11,6 @@ workflow ORANGE_BOX_ANALYSES {
 
     main:
         // Run analyses
-        // Run on All samples subworkflow
         QC_METRICS(sample_ch)
         CLASPAR_ANALYSIS(sample_ch)
         UNCLASSIFIED_QC_ANALYSIS(sample_ch)
