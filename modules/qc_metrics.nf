@@ -19,7 +19,7 @@ process QC_SAMPLE {
     */
     container 'ghcr.io/ukhsa-collaboration/gpha-mscape-sample-qc:latest'
     label "process_single"
-    tag "${meta.climb_id}:QC Metrics"
+    tag "${meta.climb_id}:QC"
     publishDir "${params.outdir}/qc_sample", mode: "copy"
 
     input:
