@@ -14,7 +14,7 @@ workflow ORANGE_BOX_ANALYSES {
         // Run on All samples subworkflow
         QC_METRICS(sample_ch)
         CLASPAR_ANALYSIS(sample_ch)
-        UNCLASSIFIED_QC_ANALYSIS(sample_ch, server)
+        UNCLASSIFIED_QC_ANALYSIS(sample_ch)
 
         // Every analysis is reshaped to the same contract so ONYX_UPLOAD can treat them identically:
         //   tuple(meta, analysis_name, analysis_json, upload_files)
