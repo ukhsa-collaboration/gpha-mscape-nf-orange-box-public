@@ -11,6 +11,7 @@ workflow QC_METRICS {
     main:
         QC_SAMPLE(sample_ch)
     emit:
+        qc_climb_id = QC_SAMPLE.out.qc_climb_id
         analysis_json = QC_SAMPLE.out.analysis_json
         upload_files = QC_SAMPLE.out.upload_files
 }
