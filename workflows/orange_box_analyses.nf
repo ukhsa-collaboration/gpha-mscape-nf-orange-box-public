@@ -25,7 +25,7 @@ workflow ORANGE_BOX_ANALYSES {
             CLASPAR_ANALYSIS.out.viralign
                 .map { meta, json, csv -> tuple(meta, 'CLASPAR_VA', json, csv) },
             CLASPAR_ANALYSIS.out.kraken
-                .map { meta, json, genera, species -> tuple(meta, 'CLASPAR_KRAKEN', json, [genera, species]) },
+                .map { meta, json, files -> tuple(meta, 'CLASPAR_KRAKEN', json, files) },
             CLASPAR_ANALYSIS.out.sylph
                 .map { meta, json, csv -> tuple(meta, 'CLASPAR_SYLPH', json, csv) },
             // // UNCLASSIFIED_QC_ANALYSIS.out.results
