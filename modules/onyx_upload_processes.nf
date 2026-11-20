@@ -1,11 +1,10 @@
 #!/usr/bin/env nextflow
-
 process FIRST_ONYX_WRITE {
     /*
         Process:
         - Pushes Orange box analysis results to Onyx and S3 to prepare for publishing an Onyx record
         Inputs:
-            - Requires climb_id, nickname of Orange Box module (e.g. QC), outputs from Orange Box modules and
+            - Requires sample channel, name of analysis module (e.g. QC), outputs from Orange Box modules and
               of *all* Orange Box modules.
 
         Outputs:
@@ -15,33 +14,32 @@ process FIRST_ONYX_WRITE {
     container 'ghcr.io/ukhsa-collaboration/gpha-mscape-onyx-analysis-helper:latest'
     label "process_single"
     tag "${sample_ch.climb_id}"
-    publishDir "$params.outdir/funnel", mode: "copy"
+    publishDir "${params.outdir}/funnel", mode: "copy"
 
     errorStrategy { sleep(Math.pow(2, task.attempt) * 200 as long); return 'retry' }
     maxRetries 5
 
     input:
     val sample_ch
-    val orange_box_module
+    val analysis_name
     path "${sample_ch.climb_id}.${orange_box_module}.analysis_fields.json"
-    val server
-    val bucket
+
 
     output:
-    path "${sample_ch.climb_id}.${orange_box_module}.temp.analysis_id", emit: temp_analysis_id_file
-    path "${sample_ch.climb_id}.${orange_box_module}.FirstWriteToOnyx.Orange_Box_Onyx_S3_transfer_log.txt", emit: funnel_logs
+    path "${sample_ch.climb_id}.${analysis_name}.temp.analysis_id", emit: temp_analysis_id_file
+    path "${sample_ch.climb_id}.${analysis_name}.FirstWriteToOnyx.Orange_Box_Onyx_S3_transfer_log.txt", emit: funnel_logs
 
     script:
     """
     onyx_analysis write \
-    --climbid $sample_ch.climb_id \
+    --climbid ${sample_ch.climb_id} \
     --output . \
-    --server $server \
+    --server ${params.server} \
     --prod \
-    --input-json ${sample_ch.climb_id}.${orange_box_module}.analysis_fields.json \
+    --input-json ${sample_ch.climb_id}.${analysis_name}.analysis_fields.json \
     --orange-box-version ${workflow.manifest.version}
-    mv ${sample_ch.climb_id}.onyx_analysis.write.analysis_id.txt ${sample_ch.climb_id}.${orange_box_module}.temp.analysis_id
-    mv ${sample_ch.climb_id}.onyx_analysis.write.log.txt ${sample_ch.climb_id}.${orange_box_module}.FirstWriteToOnyx.Orange_Box_Onyx_S3_transfer_log.txt
+    mv ${sample_ch.climb_id}.onyx_analysis.write.analysis_id.txt ${sample_ch.climb_id}.${analysis_name}.temp.analysis_id
+    mv ${sample_ch.climb_id}.onyx_analysis.write.log.txt ${sample_ch.climb_id}.${analysis_name}.FirstWriteToOnyx.Orange_Box_Onyx_S3_transfer_log.txt
     """
 }
 
@@ -51,7 +49,7 @@ process S3_UPLOAD {
         Process:
 	    - Pushes Orange box analysis results to Onyx and S3 to prepare for publishing an Onyx record
         Inputs:
-            - Requires climb_id, nickname of Orange Box module (e.g. QC), and outputs from Orange Box modules.
+            - Requires sample channel, name of anlaysis module (e.g. QC), and outputs from Orange Box modules.
               N.b. Will be run on successful completion of all modules.
 
         Outputs:
@@ -61,44 +59,42 @@ process S3_UPLOAD {
     container 'ghcr.io/ukhsa-collaboration/gpha-mscape-onyx-analysis-helper:latest'
     label "process_single"
     tag "${sample_ch.climb_id}"
-    publishDir "$params.outdir/funnel", mode: "copy"
+    publishDir "${params.outdir}/funnel", mode: "copy"
 
     errorStrategy { sleep(Math.pow(2, task.attempt) * 200 as long); return 'retry' }
     maxRetries 5
 
     input:
     val sample_ch
-    val orange_box_module
-    val server
-    val bucket
-    path "${sample_ch.climb_id}.${orange_box_module}.temp.analysis_id"
+    val analysis_name
+    path "${sample_ch.climb_id}.${analysis_name}.temp.analysis_id"
     path upload_files
 
     output:
-    path "${sample_ch.climb_id}.${orange_box_module}.s3_location.json", emit: s3_location_json
-    path "${sample_ch.climb_id}.${orange_box_module}.S3Upload.Orange_Box_Onyx_S3_transfer_log.txt", emit: funnel_logs
+    path "${sample_ch.climb_id}.${analysis_name}.s3_location.json", emit: s3_location_json
+    path "${sample_ch.climb_id}.${analysis_name}.S3Upload.Orange_Box_Onyx_S3_transfer_log.txt", emit: funnel_logs
 
     script:
     """
 
-    COMMA_SEP_S3_FILES=`echo $upload_files | sed -r {'s/\s+/,/g'}`
+    COMMA_SEP_S3_FILES=`echo ${upload_files} | sed -r {'s/\s+/,/g'}`
 
 
     onyx_analysis s3_upload \
-        --climbid $sample_ch.climb_id \
+        --climbid ${sample_ch.climb_id} \
         --output . \
-        --server $server \
+        --server ${params.server} \
         --prod \
-        --bucket $bucket \
-        --analysis-id ${sample_ch.climb_id}.${orange_box_module}.temp.analysis_id \
+        --bucket ${params.bucket} \
+        --analysis-id ${sample_ch.climb_id}.${analysis_name}.temp.analysis_id \
         --input-files \$COMMA_SEP_S3_FILES
 
     mv \
     ${sample_ch.climb_id}.onyx_analysis.s3_upload.analysis_fields.json \
-    ${sample_ch.climb_id}.${orange_box_module}.s3_location.json
+    ${sample_ch.climb_id}.${analysis_name}.s3_location.json
     mv \
     ${sample_ch.climb_id}.onyx_analysis.s3_upload.log.txt \
-    ${sample_ch.climb_id}.${orange_box_module}.S3Upload.Orange_Box_Onyx_S3_transfer_log.txt
+    ${sample_ch.climb_id}.${analysis_name}.S3Upload.Orange_Box_Onyx_S3_transfer_log.txt
 
     """
 }
@@ -109,7 +105,7 @@ process FINAL_ONYX_UPDATE {
         Process:
 	    - Pushes Orange box analysis results to Onyx and S3 to prepare for publishing an Onyx record
         Inputs:
-            - Requires climb_id, nickname of Orange Box module (e.g. QC), and outputs from Orange Box modules.
+            - Requires sample channel, name of analysis module (e.g. QC), and outputs from Orange Box modules.
               N.b. Will be run on successful completion of all modules.
 
         Outputs:
@@ -119,37 +115,35 @@ process FINAL_ONYX_UPDATE {
     container 'ghcr.io/ukhsa-collaboration/gpha-mscape-onyx-analysis-helper:latest'
     label "process_single"
     tag "${sample_ch.climb_id}"
-    publishDir "$params.outdir/funnel", mode: "copy"
+    publishDir "${params.outdir}/funnel", mode: "copy"
 
     errorStrategy { sleep(Math.pow(2, task.attempt) * 200 as long); return 'retry' }
     maxRetries 5
 
     input:
     val sample_ch
-    val orange_box_module
+    val analysis_name
     path "${sample_ch.climb_id}_qc_results.json"
-    val server
-    val bucket
-    path "${sample_ch.climb_id}.${orange_box_module}.temp.analysis_id"
-    path "${sample_ch.climb_id}.${orange_box_module}.s3_location.json"
+    path "${sample_ch.climb_id}.${analysis_name}.temp.analysis_id"
+    path "${sample_ch.climb_id}.${analysis_name}.s3_location.json"
 
     output:
-    path "${sample_ch.climb_id}.${orange_box_module}.analysis_id", emit: analysis_id_file
-    path "${sample_ch.climb_id}.${orange_box_module}.FinalOnyxUpdate.Orange_Box_Onyx_S3_transfer_log.txt", emit: funnel_logs
+    path "${sample_ch.climb_id}.${analysis_name}.analysis_id", emit: analysis_id_file
+    path "${sample_ch.climb_id}.${analysis_name}.FinalOnyxUpdate.Orange_Box_Onyx_S3_transfer_log.txt", emit: funnel_logs
 
     script:
     """
     onyx_analysis update \
-    --climbid $sample_ch.climb_id \
+    --climbid ${sample_ch.climb_id} \
     --output . \
-    --server $server \
+    --server ${params.server} \
     --prod \
-    --analysis-id ${sample_ch.climb_id}.${orange_box_module}.temp.analysis_id \
-    --input-json ${sample_ch.climb_id}.${orange_box_module}.s3_location.json
+    --analysis-id ${sample_ch.climb_id}.${analysis_name}.temp.analysis_id \
+    --input-json ${sample_ch.climb_id}.${analysis_name}.s3_location.json
     mv \
-    ${sample_ch.climb_id}.onyx_analysis.update.analysis_id.txt ${sample_ch.climb_id}.${orange_box_module}.analysis_id
+    ${sample_ch.climb_id}.onyx_analysis.update.analysis_id.txt ${sample_ch.climb_id}.${analysis_name}.analysis_id
     mv \
-   ${sample_ch.climb_id}.onyx_analysis.update.log.txt ${sample_ch.climb_id}.${orange_box_module}.FinalOnyxUpdate.Orange_Box_Onyx_S3_transfer_log.txt
+   ${sample_ch.climb_id}.onyx_analysis.update.log.txt ${sample_ch.climb_id}.${analysis_name}.FinalOnyxUpdate.Orange_Box_Onyx_S3_transfer_log.txt
     """
 }
 
@@ -168,14 +162,13 @@ process PUBLISH_ONYX {
     container 'ghcr.io/ukhsa-collaboration/gpha-mscape-onyx-analysis-helper:latest'
     label "process_single"
     tag "${sample_ch.climb_id}"
-    publishDir "$params.outdir/funnel", mode: "copy"
+    publishDir "${params.outdir}/funnel", mode: "copy"
 
     errorStrategy { sleep(Math.pow(2, task.attempt) * 200 as long); return 'retry' }
     maxRetries 5
 
     input:
     val sample_ch
-    val server
     // QC Analysis inputs
     path "${sample_ch.climb_id}.QC.analysis_id"
     // claspar inputs
@@ -202,9 +195,9 @@ process PUBLISH_ONYX {
     do
 
         onyx_analysis publish \
-            --climbid $sample_ch.climb_id \
+            --climbid ${sample_ch.climb_id} \
             --output . \
-            --server $server \
+            --server ${params.server} \
             --prod \
             --analysis-id \$ANALYSIS_ID_FILE
     done
