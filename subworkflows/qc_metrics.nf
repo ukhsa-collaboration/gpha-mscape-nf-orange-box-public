@@ -2,37 +2,15 @@
 
 include { QC_SAMPLE } from "../modules/qc_metrics.nf"
 
-include { ONYX_UPLOAD_PROCESS } from "../subworkflows/onyx_uploads.nf"
-
 workflow QC_METRICS {
     // Workflow to retrieve sample QC metrics
     take:
-        sample_ch
+        sample_ch // meta map
     main:
         QC_SAMPLE(sample_ch)
-        QC_SAMPLE.out.qc_climb_id.view()
     emit:
-        qc_climb_id = QC_SAMPLE.out.qc_climb_id
-        analysis_json = QC_SAMPLE.out.analysis_json
-        upload_files = QC_SAMPLE.out.upload_files
-}
-
-workflow QC_METRICS_ONYX_UPLOAD {
-
-    take:
-        sample_ch
-        analysis_json
-        upload_files
-
-    main:
-        ONYX_UPLOAD_PROCESS(
-            sample_ch,
-            "QC",
-            analysis_json,
-            upload_files
-        )
-
-    emit:
-        analysis_id_file = ONYX_UPLOAD_PROCESS.out.analysis_id_file
-        funnel_logs = ONYX_UPLOAD_PROCESS.out.funnel_logs
+        // upload_files is optional in QC_SAMPLE, so a sample without a
+        // _qc_results.json drops out here and is not uploaded for QC.
+        results = QC_SAMPLE.out.analysis_json.join(QC_SAMPLE.out.upload_files)   // tuple(meta, json, files)
+        logs    = QC_SAMPLE.out.logs
 }

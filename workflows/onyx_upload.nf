@@ -3,14 +3,19 @@ include { QC_METRICS_ONYX_UPLOAD }              from "../subworkflows/qc_metrics
 workflow ONYX_UPLOAD {
 
     take:
-    ch_results
+    results // tuple(meta, analysis_name, analysis_json, upload_files)
 
     main:
-    // QC Metrics
-    QC_METRICS_ONYX_UPLOAD(
-        ch_results.out.sample_ch
-        ch_results.out.qc_metrics_analysis_json,
-        ch_results.out.qc_metrics_upload_files
+    // 1. Create the Onyx analysis record (one task per sample x analysis)
+    FIRST_ONYX_WRITE(
+        results.map { sample_ch, name, json, files -> tuple(meta, name, json) }
+    )
+
+    // 2. Upload result files to S3. Join on [meta, analysis_name] so each temp
+    //    analysis id is paired with its own sample's files, whatever order tasks finish in.
+    S3_UPLOAD(
+        FIRST_ONYX_WRITE.out.temp_analysis_id
+            .join(results.map { sample_ch, name, json, files -> tuple(meta, name, files) }, by: [0, 1])
     )
 
     // CLASPAR_FUNNEL(
