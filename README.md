@@ -1,7 +1,7 @@
 # gpha-mscape-nf-orange-box
 
 # gpha-mscape-nf-orange-box
-This repository contains the Orange Box, a single-sample processing pipeline designed
+This repository contains the Orange Box, a metagenomic processing pipeline designed
 specifically for UKHSA's mSCAPE project.
 
 ## Use
@@ -44,3 +44,6 @@ nextflow run /ukhsa-collaboration/gpha-mscape-nf-orange-box-public \
     --bucket <bucket> \
     -e.ONYX_TOKEN=$ONYX_TOKEN
 ```
+
+### Development for Orange Box
+Guidance for Orange Box development can be found in [DEV.md](./DEV.MD).
