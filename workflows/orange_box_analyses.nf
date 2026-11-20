@@ -22,8 +22,8 @@ workflow ORANGE_BOX_ANALYSES {
     // UNCLASSIFIED_QC_ANALYSIS(sample_ch, server)
 
 
-    // emit:
-    //     qc           = QC_SAMPLE.out.upload_id_file
+    emit:
+        qc           = QC_SAMPLE.out.upload_id_file
     //     kraken       = CLASPAR.out.kraken
     //     viralign     = CLASPAR.out.viralign
     //     sylph        = CLASPAR.out.sylph
