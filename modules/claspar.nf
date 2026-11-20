@@ -22,9 +22,6 @@ process CLASPAR {
 
     input:
     val sample_ch
-    val server
-    path profiles_json
-    path taxaplease
 
     output:
     path "${sample_ch.climb_id}_viral_aligner_processed.csv", emit: upload_files_viralign
@@ -39,6 +36,6 @@ process CLASPAR {
 
     script:
     """
-    claspar -i $sample_ch.climb_id -o . -s $server -p $profiles_json -d $taxaplease
+    claspar -i $sample_ch.climb_id -o . -s $params.server -p $params.profiles_json -d $params.taxaplease
     """
 }
