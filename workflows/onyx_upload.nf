@@ -1,4 +1,4 @@
-include { QC_UPLOAD }              from "../subworkflows/onyx_qc_upload.nf"
+include { QC_UPLOAD_PREP }              from "../subworkflows/onyx_qc_upload.nf"
 
 workflow ONYX_UPLOADS {
 
