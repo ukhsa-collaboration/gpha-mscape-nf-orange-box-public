@@ -1,4 +1,7 @@
-include { QC_METRICS_ONYX_UPLOAD }              from "../subworkflows/qc_metrics.nf"
+include { FIRST_ONYX_WRITE  } from "../modules/onyx_upload_processes.nf"
+include { S3_UPLOAD         } from "../modules/onyx_upload_processes.nf"
+include { FINAL_ONYX_UPDATE } from "../modules/onyx_upload_processes.nf"
+include { PUBLISH_ONYX      } from "../modules/onyx_upload_processes.nf"
 
 workflow ONYX_UPLOAD {
 
