@@ -1,7 +1,7 @@
 #!/usr/bin/env nextflow
 
 include { ORANGE_BOX_ANALYSES   } from "./workflows/orange_box_analyses"
-include { ONYX_UPLOADS } from "./workflows/onyx_uploads"
+include { ONYX_UPLOAD } from "./workflows/onyx_upload"
 
 
 workflow {
@@ -28,6 +28,6 @@ workflow {
     //             // ANALYSIS.out.sylph,
     //             // ANALYSIS.out.unclassified
     //         )
-    //         ONYX_UPLOADS(ch_results)
+    //         ONYX_UPLOAD(ch_results)
     //     }
 }

@@ -9,9 +9,6 @@
 
 include { PUBLISH_ONYX                               }   from "../modules/onyx_upload_processes.nf"
 
-include { FIRST_ONYX_WRITE  as FOW__QC }                 from "../modules/onyx_upload_processes.nf"
-include { S3_UPLOAD         as S3U__QC }                 from "../modules/onyx_upload_processes.nf"
-include { FINAL_ONYX_UPDATE as FOU__QC }                 from "../modules/onyx_upload_processes.nf"
 
 include { FIRST_ONYX_WRITE  as FOW__CLASPAR_VIRALIGN }   from "../modules/onyx_upload_processes.nf"
 include { S3_UPLOAD         as S3U__CLASPAR_VIRALIGN }   from "../modules/onyx_upload_processes.nf"
