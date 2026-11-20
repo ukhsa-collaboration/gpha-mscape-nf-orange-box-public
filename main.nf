@@ -16,8 +16,6 @@ workflow {
     sample_ch = channel.fromPath(params.samplesheet)
         .splitCsv(header: true, quote: '"')
 
-    sample_ch.view() // For testing
-
     // Analyses
     ORANGE_BOX_ANALYSES(sample_ch)
 
