@@ -8,8 +8,8 @@ workflow CLASPAR {
         sample_ch
     emit:
         // Each emit is tuple(meta, analysis_json, upload_files)
-        viralign = CLASPAR.out.viralign
-        kraken   = CLASPAR.out.kraken
+        viralign = CLASPAR_PROCESS.out.viralign
+        kraken   = CLASPAR_PROCESS.out.kraken
             .map { meta, json, genera, species -> tuple(meta, json, [genera, species]) }
-        sylph    = CLASPAR.out.sylph
+        sylph    = CLASPAR_PROCESS.out.sylph
 }
