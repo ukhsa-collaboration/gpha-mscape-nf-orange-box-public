@@ -20,6 +20,7 @@ workflow {
     sample_ch.view()
 
     ORANGE_BOX_ANALYSES(sample_ch)
+    ORANGE_BOX_ANALYSES.out.view()
     // if (params.onyx_upload) {
     //         ch_results = Channel.empty().mix(
     //             ORANGE_BOX_ANALYSES.out.sample_ch,
