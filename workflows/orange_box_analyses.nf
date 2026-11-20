@@ -13,7 +13,6 @@ workflow ORANGE_BOX_ANALYSES {
         // Run analyses
         // Run on All samples subworkflow
         QC_METRICS(sample_ch)
-        QC_METRICS.out.view()
         // CLASPAR(sample_ch)
         // UNCLASSIFIED_QC_ANALYSIS(sample_ch, server)
 
