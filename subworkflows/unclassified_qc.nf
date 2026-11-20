@@ -10,13 +10,13 @@ workflow UNCLASSIFIED_QC_ANALYSIS {
     main:
 
     ch_reads = sample_ch
-        .map { ch_meta ->
-            def reads = [sample_ch.unclassified_reads_1, sample_ch.unclassified_reads_2]
-                .findAll { it }
-                .collect { file(it) }
-            tuple(sample_ch, reads)
-        }
-        .filter { sample_ch, reads -> reads }
+        .map { meta ->
+            def reads = [meta.unclassified_reads_1, meta.unclassified_reads_2]
+                .findAll { r -> r }
+                .collect { r -> file(r) }
+            tuple(meta, reads)
+         }
+        .filter { _meta, reads -> reads }
 
     ch_reads.view()
 

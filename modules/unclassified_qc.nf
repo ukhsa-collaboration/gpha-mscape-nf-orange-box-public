@@ -63,20 +63,19 @@ process CREATE_READQC_ONYX_JSON {
 
         Outputs:
             - stats_summary: Analysis json for upload into Onyx.
-            - upload_files: tuple(log file, statistics table(s)) for S3 upload.
+            - results: tuple(meta, analysis json, log file, statistics table(s))
     */
 
     container 'ghcr.io/ukhsa-collaboration/gpha-mscape-fastq-read-stats:latest'
     label "process_low"
-    tag "${ch_meta.climb_id}:UNCLASS_QC"
+    tag "${meta.climb_id}:UNCLASS_QC"
     publishDir "${params.outdir}/${meta.climb_id}_unclassified_qc", mode: 'copy'
 
     input:
     tuple val(meta), val(qc_text), path(stats_list)
 
     output:
-    path("${meta.climb_id}.unclassified_readQC.analysis_fields.json"), emit: stats_summary
-    tuple path("${meta.climb_id}.unclassified.readQC.analysis_fields.log.txt"), path(stats_list), emit: upload_files
+    tuple val(meta), path("${meta.climb_id}.unclassified_readQC.analysis_fields.json"), path("${meta.climb_id}.unclassified.readQC.analysis_fields.log.txt"), path(stats_list), emit: results
 
     script:
     """
