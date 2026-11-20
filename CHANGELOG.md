@@ -1,4 +1,13 @@
 # Changelog
+## 2026-11-20 v.2.0.0 - Orange Box
+Updated documentation
+### Changes:
+- Bumped version number
+- Referenced DEV.md in README.md
+
+### Added:
+- DEV.md file to describe how to add new analyses into Orange Box.
+
 ## 2026-11-20 v.1.1.0 - Orange Box
 Merging refactor/unclassified-qc with pre-production branch
 
@@ -10,7 +19,6 @@ Merging refactor/unclassified-qc with pre-production branch
 ### Added:
 - Gatekeep before any onyx interactions
 
-# Changelog
 ## 2026-11-18 v.1.0.5 - Orange Box
 Merging refactor/unclassified-qc with pre-production branch
 
