@@ -15,7 +15,7 @@ workflow QC_METRICS {
         upload_files = QC_SAMPLE.out.upload_files
 }
 
-workflow ONYX_UPLOAD_PROCESS {
+workflow QC_MERTICS_ONYX_UPLOAD {
 
     take:
         sample_ch

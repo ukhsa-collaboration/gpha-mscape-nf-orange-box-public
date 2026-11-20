@@ -1,28 +1,42 @@
-include { QC_METRICS_UPLOAD_PREP }              from "../subworkflows/onyx_qc_upload.nf"
+include { QC_MERTICS_ONYX_UPLOAD }              from "../subworkflows/qc_metrics.nf"
 
 workflow ONYX_UPLOAD {
 
     take:
-    sample_ch
-    // QC_SAMPLE outputs
-    qc_analysis_json
-    qc_metrics_upload_files
-
-    // // CLASPAR outputs
-    // viralign_analysis_json
-    // viralign_upload_files
-    // kraken_analysis_json
-    // kraken_upload_files
-    // sylph_analysis_json
-    // sylph_upload_files
-
-    // // // Unclassified QC_SAMPLE outputs
-    // unclass_qc_analysis_json
-    // unclass_qc_upload_files
+    ch_results
 
     main:
-    // QC METRICS
-    QC_METRICS_UPLOAD_PREP(sample_ch, "QC", qc_metrics_analysis_json, qc_metrics_upload_files)
+    // QC Metrics
+    QC_MERTICS_ONYX_UPLOAD(
+        climb_id,
+        ch_results.out.qc_metrics_analysis_json,
+        ch_results.out.qc_metrics_upload_files
+    )
+
+    // CLASPAR_FUNNEL(
+    //     climb_id,
+    //     server,
+    //     bucket,
+
+    //     CLASPAR_ANALYSIS.out.analysis_json_viralign,
+    //     CLASPAR_ANALYSIS.out.upload_files_viralign,
+
+    //     CLASPAR_ANALYSIS.out.analysis_json_kraken,
+    //     CLASPAR_ANALYSIS.out.upload_files_kraken,
+
+    //     CLASPAR_ANALYSIS.out.analysis_json_sylph,
+    //     CLASPAR_ANALYSIS.out.upload_files_sylph
+    // )
+
+    // PUBLISH_ONYX(
+    //     climb_id,
+    //     server,
+    //     QC_FUNNEL.out.analysis_id_file,
+    //     CLASPAR_FUNNEL.out.viralign_analysis_id,
+    //     CLASPAR_FUNNEL.out.kraken_analysis_id,
+    //     CLASPAR_FUNNEL.out.sylph_analysis_id
+    // )
+
 
     // CLASPAR
     // CLASPAR_VIRALIGN_UPLOAD_PREP(sample_ch, "CLASPAR_VA", analysis_json_viralign)
