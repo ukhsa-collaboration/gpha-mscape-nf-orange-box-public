@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-process QC_METRICS {
+process QC_SAMPLE {
     /*
         Runs qc_sample on the input climb_id. This process takes metrics
         from onyx and compares them to threshold values and determines

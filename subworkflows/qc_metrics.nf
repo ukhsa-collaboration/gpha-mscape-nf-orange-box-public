@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-include { QC_METRICS } from "../modules/qc_metrics.nf"
+include { QC_SAMPLE } from "../modules/qc_metrics.nf"
 
 include { ONYX_UPLOAD_PROCESS } from "../subworkflows/onyx_uploads.nf"
 
