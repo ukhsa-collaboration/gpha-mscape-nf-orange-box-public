@@ -20,7 +20,7 @@ nextflow run ukhsa-collaboration/gpha-mscape-nf-orange-box-public
     --samplesheet <path/to/samplesheet.csv> \
     --taxaplease_db <path/to/db> \
     --profiles_json <path/to/profiles> \
-    --skip_onyx_upload true
+    --onyx_upload false
 ```
 
 This will create all of the outputs in `results` directort, or you can specify an output location with `--output_dir <path/to/output>` argument.
@@ -40,6 +40,7 @@ nextflow run /ukhsa-collaboration/gpha-mscape-nf-orange-box-public \
     --samplesheet <samplesheet> \
     --taxaplease_db <path_to_database> \
     --profiles_json <path_to_profiles_json> \
+    --onyx_upload true \
     --bucket <bucket> \
     -e.ONYX_TOKEN=$ONYX_TOKEN
 ```

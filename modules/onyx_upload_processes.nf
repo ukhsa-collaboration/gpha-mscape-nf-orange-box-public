@@ -1,50 +1,47 @@
 #!/usr/bin/env nextflow
-
 process FIRST_ONYX_WRITE {
     /*
         Process:
-        - Pushes Orange box analysis results to Onyx and S3 to prepare for publishing an Onyx record
+        - Creates the Onyx analysis record for one sample x analysis.
         Inputs:
-            - Requires climb_id, nickname of Orange Box module (e.g. QC), outputs from Orange Box modules and
-              of *all* Orange Box modules.
-
+           - tuple(meta, analysis_name, analysis_json): meta map (needs climb_id), name of the
+              Orange Box analysis (e.g. QC) and its analysis_fields json.
         Outputs:
-            - Analysis_id files for each module in the form ${climb_id}.${orange_box_module}.analysis_id.  The subesquent
-              publish step will then use these with skeleton OnyxAnalysis helper objects to publish each analysis.
+            - temp_analysis_id: tuple(meta, analysis_name, temp analysis id file)
+            - funnel_logs: transfer log
     */
     container 'ghcr.io/ukhsa-collaboration/gpha-mscape-onyx-analysis-helper:latest'
-    cpus 1
-    memory '1GB'
-    tag "Funnelling ${climb_id} Orange Box analyses: FirstWriteToOnyx"
-    publishDir "$params.outdir/funnel", mode: "copy"
+    label "process_single"
+    tag "${meta.climb_id}:${analysis_name}"
+    publishDir "${params.outdir}/funnel", mode: "copy"
 
     errorStrategy { sleep(Math.pow(2, task.attempt) * 200 as long); return 'retry' }
     maxRetries 5
 
     input:
-    val climb_id
-    val orange_box_module
-    path "${climb_id}.${orange_box_module}.analysis_fields.json"
-    val server
-    val bucket
+    tuple val(meta), val(analysis_name), path(analysis_json)
 
     output:
-    path "${climb_id}.${orange_box_module}.temp.analysis_id", emit: temp_analysis_id_file
-    path "${climb_id}.${orange_box_module}.FirstWriteToOnyx.Orange_Box_Onyx_S3_transfer_log.txt", emit: funnel_logs
+    tuple val(meta), val(analysis_name), path("${meta.climb_id}.${analysis_name}.temp.analysis_id"), emit: temp_analysis_id
+    path "${meta.climb_id}.${analysis_name}.FirstWriteToOnyx.Orange_Box_Onyx_S3_transfer_log.txt", emit: funnel_logs
 
     script:
     """
-    echo '# # # # # starting funnel task: FirstWriteToOnyx'
     onyx_analysis write \
-    --climbid $climb_id \
-    --output . \
-    --server $server \
-    --prod \
-    --input-json ${climb_id}.${orange_box_module}.analysis_fields.json \
-    --orange-box-version ${workflow.manifest.version}
-    mv ${climb_id}.onyx_analysis.write.analysis_id.txt ${climb_id}.${orange_box_module}.temp.analysis_id
-    mv ${climb_id}.onyx_analysis.write.log.txt ${climb_id}.${orange_box_module}.FirstWriteToOnyx.Orange_Box_Onyx_S3_transfer_log.txt
-    echo '# # # # # finished funnel task: FirstWriteToOnyx'
+        --climbid ${meta.climb_id} \
+        --output . \
+        --server ${params.server} \
+        --prod \
+        --input-json ${analysis_json} \
+        --orange-box-version ${workflow.manifest.version}
+    mv ${meta.climb_id}.onyx_analysis.write.analysis_id.txt ${meta.climb_id}.${analysis_name}.temp.analysis_id
+    mv ${meta.climb_id}.onyx_analysis.write.log.txt ${meta.climb_id}.${analysis_name}.FirstWriteToOnyx.Orange_Box_Onyx_S3_transfer_log.txt
+    """
+
+    stub:
+    """
+    touch ${meta.climb_id}.${analysis_name}.temp.analysis_id
+    touch ${meta.climb_id}.${analysis_name}.FirstWriteToOnyx.Orange_Box_Onyx_S3_transfer_log.txt
     """
 }
 
@@ -52,63 +49,48 @@ process FIRST_ONYX_WRITE {
 process S3_UPLOAD {
     /*
         Process:
-	    - Pushes Orange box analysis results to Onyx and S3 to prepare for publishing an Onyx record
+	    - Uploads analysis to S3 and prepares publishing an Onyx record
         Inputs:
-            - Requires climb_id, nickname of Orange Box module (e.g. QC), and outputs from Orange Box modules.
-              N.b. Will be run on successful completion of all modules.
-
+            - tuple(meta, analysis_name, temp_analysis_id, upload_files)
         Outputs:
-            - Analysis_id files for each module in the form ${climb_id}.${orange_box_module}.analysis_id.  The subesquent
-              publish step will then use these with skeleton OnyxAnalysis helper objects to publish each analysis.
+            - s3_location_json: tuple(meta, analysis_name, s3 location json)
+            - funnel_logs: transfer log
     */
     container 'ghcr.io/ukhsa-collaboration/gpha-mscape-onyx-analysis-helper:latest'
-    cpus 1
-    memory '1GB'
-    tag "Funnelling ${climb_id} Orange Box analyses: S3Upload"
-    publishDir "$params.outdir/funnel", mode: "copy"
+    label "process_single"
+    tag "${meta.climb_id}:${analysis_name}"
+    publishDir "${params.outdir}/funnel", mode: "copy"
 
     errorStrategy { sleep(Math.pow(2, task.attempt) * 200 as long); return 'retry' }
     maxRetries 5
 
     input:
-    val climb_id
-    val orange_box_module
-    val server
-    val bucket
-    path "${climb_id}.${orange_box_module}.temp.analysis_id"
-    path upload_files
-    // qc-specific...  path "${climb_id}_qc_results.json"
+    tuple val(meta), val(analysis_name), path(temp_analysis_id), path(upload_files)
 
     output:
-    path "${climb_id}.${orange_box_module}.s3_location.json", emit: s3_location_json
-    path "${climb_id}.${orange_box_module}.S3Upload.Orange_Box_Onyx_S3_transfer_log.txt", emit: funnel_logs
+    tuple val(meta), val(analysis_name), path("${meta.climb_id}.${analysis_name}.s3_location.json"), emit: s3_location_json
+    path "${meta.climb_id}.${analysis_name}.S3Upload.Orange_Box_Onyx_S3_transfer_log.txt", emit: funnel_logs
 
     script:
+    def files = [upload_files].flatten().join(',')
     """
-    echo '# # # # # starting funnel task: S3Upload'
+    onyx_analysis s3_upload \\
+        --climbid ${meta.climb_id} \\
+        --output . \\
+        --server ${params.server} \\
+        --prod \\
+        --bucket ${params.bucket} \\
+        --analysis-id ${temp_analysis_id} \\
+        --input-files ${files}
 
-    echo '# # # # # parsing upload_files channel into CSV argument'
-    COMMA_SEP_S3_FILES=`echo $upload_files | sed -r {'s/\s+/,/g'}`
+    mv ${meta.climb_id}.onyx_analysis.s3_upload.analysis_fields.json ${meta.climb_id}.${analysis_name}.s3_location.json
+    mv ${meta.climb_id}.onyx_analysis.s3_upload.log.txt ${meta.climb_id}.${analysis_name}.S3Upload.Orange_Box_Onyx_S3_transfer_log.txt
+    """
 
-    echo '# # # # #   --input-files' \$COMMA_SEP_S3_FILES
-
-    onyx_analysis s3_upload \
-        --climbid $climb_id \
-        --output . \
-        --server $server \
-        --prod \
-        --bucket $bucket \
-        --analysis-id ${climb_id}.${orange_box_module}.temp.analysis_id \
-        --input-files \$COMMA_SEP_S3_FILES
-
-    mv \
-    ${climb_id}.onyx_analysis.s3_upload.analysis_fields.json \
-    ${climb_id}.${orange_box_module}.s3_location.json
-    mv \
-    ${climb_id}.onyx_analysis.s3_upload.log.txt \
-    ${climb_id}.${orange_box_module}.S3Upload.Orange_Box_Onyx_S3_transfer_log.txt
-
-    echo '# # # # # finished funnel task: S3Upload'
+    stub:
+    """
+    echo '{}' > ${meta.climb_id}.${analysis_name}.s3_location.json
+    touch ${meta.climb_id}.${analysis_name}.S3Upload.Orange_Box_Onyx_S3_transfer_log.txt
     """
 }
 
@@ -116,52 +98,45 @@ process S3_UPLOAD {
 process FINAL_ONYX_UPDATE {
     /*
         Process:
-	    - Pushes Orange box analysis results to Onyx and S3 to prepare for publishing an Onyx record
+	        - Writes the S3 locations back to the Onyx analysis record.
         Inputs:
-            - Requires climb_id, nickname of Orange Box module (e.g. QC), and outputs from Orange Box modules.
-              N.b. Will be run on successful completion of all modules.
-
+            - tuple(meta, analysis_name, temp_analysis_id, s3_location_json)
         Outputs:
-            - Analysis_id files for each module in the form ${climb_id}.${orange_box_module}.analysis_id.  The subesquent
-              publish step will then use these with skeleton OnyxAnalysis helper objects to publish each analysis.
+            - analysis_id: tuple(meta, analysis_name, final analysis id file)
+            - funnel_logs: transfer log
     */
     container 'ghcr.io/ukhsa-collaboration/gpha-mscape-onyx-analysis-helper:latest'
-    cpus 1
-    memory '1GB'
-    tag "Funnelling ${climb_id} Orange Box analyses: FinalOnyxUpdate"
-    publishDir "$params.outdir/funnel", mode: "copy"
+    label "process_single"
+    tag "${meta.climb_id}:${analysis_name}"
+    publishDir "${params.outdir}/funnel", mode: "copy"
 
     errorStrategy { sleep(Math.pow(2, task.attempt) * 200 as long); return 'retry' }
     maxRetries 5
 
     input:
-    val climb_id
-    val orange_box_module
-    path "${climb_id}_qc_results.json"
-    val server
-    val bucket
-    path "${climb_id}.${orange_box_module}.temp.analysis_id"
-    path "${climb_id}.${orange_box_module}.s3_location.json"
+    tuple val(meta), val(analysis_name), path(temp_analysis_id), path(s3_location_json)
 
     output:
-    path "${climb_id}.${orange_box_module}.analysis_id", emit: analysis_id_file
-    path "${climb_id}.${orange_box_module}.FinalOnyxUpdate.Orange_Box_Onyx_S3_transfer_log.txt", emit: funnel_logs
+    tuple val(meta), val(analysis_name), path("${meta.climb_id}.${analysis_name}.analysis_id"), emit: analysis_id
+    path "${meta.climb_id}.${analysis_name}.FinalOnyxUpdate.Orange_Box_Onyx_S3_transfer_log.txt", emit: funnel_logs
 
     script:
     """
-    echo '# # # # # starting funnel task: FinalOnyxUpdate'
-    onyx_analysis update \
-    --climbid $climb_id \
-    --output . \
-    --server $server \
-    --prod \
-    --analysis-id ${climb_id}.${orange_box_module}.temp.analysis_id \
-    --input-json ${climb_id}.${orange_box_module}.s3_location.json
-    mv \
-    ${climb_id}.onyx_analysis.update.analysis_id.txt ${climb_id}.${orange_box_module}.analysis_id
-    mv \
-   ${climb_id}.onyx_analysis.update.log.txt ${climb_id}.${orange_box_module}.FinalOnyxUpdate.Orange_Box_Onyx_S3_transfer_log.txt
-    echo '# # # # # finished funnel task: FinalOnyxUpdate'
+    onyx_analysis update \\
+        --climbid ${meta.climb_id} \\
+        --output . \\
+        --server ${params.server} \\
+        --prod \\
+        --analysis-id ${temp_analysis_id} \\
+        --input-json ${s3_location_json}
+    mv ${meta.climb_id}.onyx_analysis.update.analysis_id.txt ${meta.climb_id}.${analysis_name}.analysis_id
+    mv ${meta.climb_id}.onyx_analysis.update.log.txt ${meta.climb_id}.${analysis_name}.FinalOnyxUpdate.Orange_Box_Onyx_S3_transfer_log.txt
+    """
+
+    stub:
+    """
+    touch ${meta.climb_id}.${analysis_name}.analysis_id
+    touch ${meta.climb_id}.${analysis_name}.FinalOnyxUpdate.Orange_Box_Onyx_S3_transfer_log.txt
     """
 }
 
@@ -169,57 +144,45 @@ process FINAL_ONYX_UPDATE {
 process PUBLISH_ONYX {
     /*
         Process:
-        - Publishes an Onyx record
+        - Publishes every Onyx analysis record for one sample.
         Inputs:
-            - Requires climb_id, analysis_id_file (containing analysis_id) and server {synthscape, mscape}
-              N.b. Will be run when all modules have successfully completed their Onyx/S3 transfers.
-
+            - tuple(meta, analysis_id_files): all final analysis id files for the sample.
+              Only runs once every analysis has finished its Onyx/S3 transfer.
         Outputs:
-            - None, bar a log file.
+            - publish_logs: log file
     */
     container 'ghcr.io/ukhsa-collaboration/gpha-mscape-onyx-analysis-helper:latest'
-    cpus 1
-    memory '1GB'
-    tag "Funnelling ${climb_id} Orange Box analyses: Publish to Onyx"
-    publishDir "$params.outdir/funnel", mode: "copy"
+    label "process_single"
+    tag "${meta.climb_id}"
+    publishDir "${params.outdir}/funnel", mode: "copy"
 
     errorStrategy { sleep(Math.pow(2, task.attempt) * 200 as long); return 'retry' }
     maxRetries 5
 
     input:
-    val climb_id
-    val server
-    path "${climb_id}.QC.analysis_id"
-
-    // claspar inputs
-    path "${climb_id}.CLASPAR_VA.analysis_id"
-    path "${climb_id}.CLASPAR_KRAKEN.analysis_id"
-    path "${climb_id}.CLASPAR_SYLPH.analysis_id"
+    tuple val(meta), path(analysis_id_files)
 
     output:
-    path "${climb_id}.Orange_Box_Onyx_publish_log.txt", emit: publish_logs
+    path "${meta.climb_id}.Orange_Box_Onyx_publish_log.txt", emit: publish_logs
 
-   script:
+    script:
+    def id_files = [analysis_id_files].flatten().join(' ')
     """
-    echo '# # # # # starting funnel publish step'
-
-    for ANALYSIS_ID_FILE in \
-        ${climb_id}.QC.analysis_id \
-        ${climb_id}.CLASPAR_VA.analysis_id \
-        ${climb_id}.CLASPAR_KRAKEN.analysis_id \
-        ${climb_id}.CLASPAR_SYLPH.analysis_id
+    for ANALYSIS_ID_FILE in ${id_files}
     do
-        echo "Publishing \$ANALYSIS_ID_FILE"
-
-        onyx_analysis publish \
-            --climbid $climb_id \
-            --output . \
-            --server $server \
-            --prod \
+        onyx_analysis publish \\
+            --climbid ${meta.climb_id} \\
+            --output . \\
+            --server ${params.server} \\
+            --prod \\
             --analysis-id \$ANALYSIS_ID_FILE
     done
-    mv ${climb_id}.onyx_analysis.publish.log.txt ${climb_id}.Orange_Box_Onyx_publish_log.txt
+    mv ${meta.climb_id}.onyx_analysis.publish.log.txt ${meta.climb_id}.Orange_Box_Onyx_publish_log.txt
+    """
 
-    echo '# # # # # finished funnel publish step'
-"""
+    stub:
+    def id_files = [analysis_id_files].flatten().join(' ')
+    """
+    echo "would publish: ${id_files}" > ${meta.climb_id}.Orange_Box_Onyx_publish_log.txt
+    """
 }
