@@ -18,6 +18,7 @@ workflow ORANGE_BOX_ANALYSES {
 
 
     emit:
+        qc_climb_id = QC_METRICS.out.qc_climb_id
         qc_metrics_analysis_json    = QC_METRICS.out.analysis_json
         qc_metrics_upload_files     = QC_METRICS.out.upload_files
         // claspar_kraken       = CLASPAR.out.analysis_json_kraken
