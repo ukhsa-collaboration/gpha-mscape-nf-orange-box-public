@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-process QC_SAMPLE {
+process QC_METRICS {
     /*
         Runs qc_sample on the input climb_id. This process takes metrics
         from onyx and compares them to threshold values and determines
@@ -15,8 +15,8 @@ process QC_SAMPLE {
             - analysis_json: Path to the onyx analysis json file.
             - upload_files: Output files to be uploaded to s3
             - logs: Log file for the component
-             
-            
+
+
     */
     container 'ghcr.io/ukhsa-collaboration/gpha-mscape-sample-qc:latest'
     label "process_single"
@@ -25,7 +25,6 @@ process QC_SAMPLE {
 
     input:
     val sample_ch
-    val server
 
     output:
     path "${sample_ch.climb_id}.QC.analysis_fields.json", emit: analysis_json
@@ -34,7 +33,7 @@ process QC_SAMPLE {
 
     script:
     """
-    qc_sample -i $sample_ch.climb_id -o . -s $server --store-onyx
+    qc_sample -i $sample_ch.climb_id -o . -s $params.server --store-onyx
     cp ${sample_ch.climb_id}_qc_metrics_analysis_fields.json  ${sample_ch.climb_id}.QC.analysis_fields.json
     """
 }

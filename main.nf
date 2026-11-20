@@ -19,7 +19,7 @@ workflow {
 
     sample_ch.view()
 
-    ORANGE_BOX_ANALYSES(sample_ch, params.outdir, params.server, params.bucket, params.profiles_json, params.taxaplease_db)
+    ORANGE_BOX_ANALYSES(sample_ch)
     // if (params.onyx_upload) {
     //         ch_results = Channel.empty().mix(
     //             ANALYSIS.out.qc,

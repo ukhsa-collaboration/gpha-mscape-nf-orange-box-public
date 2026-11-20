@@ -1,5 +1,5 @@
 
-include { QC_SAMPLE    }              from "../modules/qc_metrics.nf"
+include { QC_METRICS   }              from "../modules/qc_metrics.nf"
 // include { CLASPAR      }              from "../modules/claspar.nf"
 // include { UNCLASSIFIED_QC_ANALYSIS } from "../subworkflows/unclassified_qc.nf"
 
@@ -8,16 +8,12 @@ workflow ORANGE_BOX_ANALYSES {
 
     take:
     sample_ch
-    server
-    bucket
-    profiles_json
-    taxaplease
 
     main:
     // Run analyses
     // Run on All samples subworkflow
-    QC_SAMPLE(sample_ch, server)
-    QC_SAMPLE.out.analysis_json.view()
+    QC_METRICS(sample_ch)
+    QC_METRICS.out.analysis_json.view()
     // CLASPAR(sample_ch, server, profiles_json, taxaplease)
     // UNCLASSIFIED_QC_ANALYSIS(sample_ch, server)
 
