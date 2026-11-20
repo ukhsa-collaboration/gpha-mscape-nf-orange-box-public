@@ -18,10 +18,10 @@ workflow ORANGE_BOX_ANALYSES {
 
 
     emit:
-        qc           = QC_METRICS.out.analysis_json
-        kraken       = CLASPAR.out.analysis_json_kraken
-        viralign     = CLASPAR.out.analysis_json_viralign
-        sylph        = CLASPAR.out.analysis_json_sylph
+        qc_metrics           = QC_METRICS.out.analysis_json
+        claspar_kraken       = CLASPAR.out.analysis_json_kraken
+        claspar_viralign     = CLASPAR.out.analysis_json_viralign
+        claspar_sylph        = CLASPAR.out.analysis_json_sylph
     //     unclassified = UNCLASSIFIED_QC_ANALYSIS.out.uploads
 
 
