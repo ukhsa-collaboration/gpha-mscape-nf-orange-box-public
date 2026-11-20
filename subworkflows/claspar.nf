@@ -12,3 +12,4 @@ workflow CLASPAR {
         kraken   = CLASPAR.out.kraken
             .map { meta, json, genera, species -> tuple(meta, json, [genera, species]) }
         sylph    = CLASPAR.out.sylph
+}
