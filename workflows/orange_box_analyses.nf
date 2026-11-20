@@ -1,7 +1,7 @@
 
 include { QC_METRICS               } from "../subworkflows/qc_metrics.nf"
 include { CLASPAR_ANALYSIS         } from "../subworkflows/claspar.nf"
-// include { UNCLASSIFIED_QC_ANALYSIS } from "../subworkflows/unclassified_qc.nf"
+include { UNCLASSIFIED_QC_ANALYSIS } from "../subworkflows/unclassified_qc.nf"
 
 
 workflow ORANGE_BOX_ANALYSES {
