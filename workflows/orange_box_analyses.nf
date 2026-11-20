@@ -7,14 +7,14 @@ include { CLASPAR      }              from "../modules/claspar.nf"
 workflow ORANGE_BOX_ANALYSES {
 
     take:
-    sample_ch
+        sample_ch
 
     main:
-    // Run analyses
-    // Run on All samples subworkflow
-    QC_METRICS(sample_ch)
-    // CLASPAR(sample_ch)
-    // UNCLASSIFIED_QC_ANALYSIS(sample_ch, server)
+        // Run analyses
+        // Run on All samples subworkflow
+        QC_METRICS(sample_ch)
+        // CLASPAR(sample_ch)
+        // UNCLASSIFIED_QC_ANALYSIS(sample_ch, server)
 
 
     emit:
