@@ -38,4 +38,10 @@ process CLASPAR_PROCESS {
     """
     claspar -i $sample_ch.climb_id -o . -s $params.server -p $params.profiles_json -d $params.taxaplease_db
     """
+
+    stub:
+    """
+    for f in claspar-viralaligner claspar-krakenbacteria claspar-sylph; do echo '{}' > ${meta.climb_id}.\$f.analysis_fields.json; done
+    touch ${meta.climb_id}_viral_aligner_processed.csv ${meta.climb_id}_kraken_processed_genera.csv ${meta.climb_id}_kraken_processed_species.csv ${meta.climb_id}_sylph_processed.csv
+    """
 }
