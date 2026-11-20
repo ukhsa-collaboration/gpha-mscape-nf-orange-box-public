@@ -18,7 +18,7 @@ process CLASPAR {
     */
     container 'ghcr.io/ukhsa-collaboration/gpha-mscape-orangebox-claspar:latest'
     label "process_low"
-    tag "${sample_ch.climb_id}:CLASPAR"
+    tag "${meta.climb_id}:CLASPAR"
     publishDir "${params.outdir}/claspar", mode: "copy"
 
     input:
