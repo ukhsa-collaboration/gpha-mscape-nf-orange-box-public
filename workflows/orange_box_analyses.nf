@@ -1,6 +1,6 @@
 
 include { QC_METRICS               } from "../subworkflows/qc_metrics.nf"
-// include { CLASPAR                  } from "../subworkflows/claspar.nf"
+include { CLASPAR                  } from "../subworkflows/claspar.nf"
 // include { UNCLASSIFIED_QC_ANALYSIS } from "../subworkflows/unclassified_qc.nf"
 
 
@@ -13,7 +13,7 @@ workflow ORANGE_BOX_ANALYSES {
         // Run analyses
         // Run on All samples subworkflow
         QC_METRICS(sample_ch)
-        // CLASPAR(sample_ch)
+        CLASPAR(sample_ch)
         // UNCLASSIFIED_QC_ANALYSIS(sample_ch, server)
 
         // Every analysis is reshaped to the same contract so ONYX_UPLOAD can treat them identically:
@@ -22,12 +22,12 @@ workflow ORANGE_BOX_ANALYSES {
         results = channel.empty().mix(
             QC_METRICS.out.results
                 .map { meta, json, files -> tuple(meta, 'QC', json, files) },
-            // CLASPAR.out.viralign
-            //     .map { meta, json, csv -> tuple(meta, 'CLASPAR_VA', json, csv) },
-            // CLASPAR.out.kraken
-            //     .map { meta, json, genera, species -> tuple(meta, 'CLASPAR_KRAKEN', json, [genera, species]) },
-            // CLASPAR.out.sylph
-            //     .map { meta, json, csv -> tuple(meta, 'CLASPAR_SYLPH', json, csv) },
+            CLASPAR.out.viralign
+                .map { meta, json, csv -> tuple(meta, 'CLASPAR_VA', json, csv) },
+            CLASPAR.out.kraken
+                .map { meta, json, genera, species -> tuple(meta, 'CLASPAR_KRAKEN', json, [genera, species]) },
+            CLASPAR.out.sylph
+                .map { meta, json, csv -> tuple(meta, 'CLASPAR_SYLPH', json, csv) },
             // // UNCLASSIFIED_QC_ANALYSIS.out.results
             //     .map { meta, json, files -> tuple(meta, 'UNCLASS_QC', json, files) },
         )
