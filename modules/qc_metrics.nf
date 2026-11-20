@@ -26,8 +26,8 @@ process QC_SAMPLE {
     val meta
 
     output:
-    tuple val(meta), path "${meta.climb_id}.QC.analysis_fields.json", emit: analysis_json
-    tuple val(meta), path "${meta.climb_id}_qc_results.json", emit: upload_files, optional: true
+    tuple val(meta), path("${meta.climb_id}.QC.analysis_fields.json"), emit: analysis_json
+    tuple val(meta), path("${meta.climb_id}_qc_results.json"), emit: upload_files, optional: true
     path "${meta.climb_id}_qc_metrics_log.txt", emit: logs
 
     script:
