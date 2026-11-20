@@ -1,4 +1,16 @@
 # Changelog
+## 2026-11-20 v.1.1.0 - Orange Box
+Merging refactor/unclassified-qc with pre-production branch
+
+### Changes:
+- Converted to more nf native workflow (results combined)
+- Removed server, bucket, output directory calls
+- Changed input arg to samplesheet (not input)
+
+### Added:
+- Gatekeep before any onyx interactions
+
+# Changelog
 ## 2026-11-18 v.1.0.5 - Orange Box
 Merging refactor/unclassified-qc with pre-production branch
 
