@@ -6,6 +6,10 @@ workflow CLASPAR_ANALYSIS {
     // Workflow to retrieve sample QC metrics
     take:
         sample_ch
+
+    main:
+        CLASPAR(sample_ch)
+
     emit:
         // Each emit is tuple(meta, analysis_json, upload_files)
         viralign = CLASPAR.out.viralign
