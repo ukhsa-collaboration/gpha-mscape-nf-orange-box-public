@@ -25,7 +25,7 @@ workflow ONYX_UPLOADS {
 
     main:
     // QC
-    QC_UPLOAD(sample_ch, "QC", qc_analysis_json)
+    QC_UPLOAD_PREP(sample_ch, "QC", qc_analysis_json)
 
     // // ClasPar: viral aligner
     // FOW__CLASPAR_VIRALIGN(sample_ch, "CLASPAR_VA", viralign_analysis_json, server, bucket)
