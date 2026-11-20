@@ -1,7 +1,7 @@
 #!/usr/bin/env nextflow
 
 include { ORANGE_BOX_ANALYSES   } from "./workflows/orange_box_analyses"
-include { ONYX_UPLOAD } from "./workflows/onyx_upload"
+// include { ONYX_UPLOAD } from "./workflows/onyx_upload"
 
 
 workflow {
