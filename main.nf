@@ -22,6 +22,7 @@ workflow {
     ORANGE_BOX_ANALYSES(sample_ch)
     if (params.onyx_upload) {
             ch_results = Channel.empty().mix(
+                sample_ch,
                 ORANGE_BOX_ANALYSES.out.qc_metrics_analysis_json,
                 ORANGE_BOX_ANALYSES.out.qc_metrics_upload_files,
                 // ANALYSIS.out.kraken,
