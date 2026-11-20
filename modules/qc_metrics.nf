@@ -36,4 +36,11 @@ process QC_SAMPLE {
     qc_sample -i $sample_ch.climb_id -o . -s $params.server --store-onyx
     cp ${sample_ch.climb_id}_qc_metrics_analysis_fields.json  ${sample_ch.climb_id}.QC.analysis_fields.json
     """
+
+    stub:
+    """
+    echo '{}' > ${meta.climb_id}.QC.analysis_fields.json
+    echo '{}' > ${meta.climb_id}_qc_results.json
+    touch ${meta.climb_id}_qc_metrics_log.txt
+    """
 }
