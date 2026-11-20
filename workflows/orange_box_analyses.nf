@@ -28,8 +28,8 @@ workflow ORANGE_BOX_ANALYSES {
                 .map { meta, json, files -> tuple(meta, 'CLASPAR_KRAKEN', json, files) },
             CLASPAR_ANALYSIS.out.sylph
                 .map { meta, json, csv -> tuple(meta, 'CLASPAR_SYLPH', json, csv) },
-            // // UNCLASSIFIED_QC_ANALYSIS.out.results
-            //     .map { meta, json, files -> tuple(meta, 'UNCLASS_QC', json, files) },
+            UNCLASSIFIED_QC_ANALYSIS.out.results
+                .map { meta, json, files -> tuple(meta, 'UNCLASS_QC', json, files) },
         )
 
 
