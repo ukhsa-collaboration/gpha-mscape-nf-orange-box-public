@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-include { CLASPAR_PROCESS } from "../modules/clapar.nf"
+include { CLASPAR_PROCESS } from "../modules/claspar.nf"
 
 workflow CLASPAR {
     // Workflow to retrieve sample QC metrics
