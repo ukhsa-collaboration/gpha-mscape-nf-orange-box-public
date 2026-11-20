@@ -18,73 +18,24 @@ workflow ONYX_UPLOAD {
             .join(results.map { sample_ch, name, json, files -> tuple(meta, name, files) }, by: [0, 1])
     )
 
-    // CLASPAR_FUNNEL(
-    //     climb_id,
-    //     server,
-    //     bucket,
+     // 3. Write the S3 locations back to the Onyx record
+    FINAL_ONYX_UPDATE(
+        FIRST_ONYX_WRITE.out.temp_analysis_id
+            .join(S3_UPLOAD.out.s3_location_json, by: [0, 1])
+    )
 
-    //     CLASPAR_ANALYSIS.out.analysis_json_viralign,
-    //     CLASPAR_ANALYSIS.out.upload_files_viralign,
+    // 4. Publish. groupTuple() with no size only emits once FINAL_ONYX_UPDATE has
+    //    finished for every sample and analysis (same barrier as .collect()), but still
+    //    gives one PUBLISH_ONYX task per sample with all of that sample's analysis ids.
+    PUBLISH_ONYX(
+        FINAL_ONYX_UPDATE.out.analysis_id
+            .map { meta, name, id_file -> tuple(meta, id_file) }
+            .groupTuple()
+    )
 
-    //     CLASPAR_ANALYSIS.out.analysis_json_kraken,
-    //     CLASPAR_ANALYSIS.out.upload_files_kraken,
+    emit:
+    publish_logs = PUBLISH_ONYX.out.publish_logs
+    funnel_logs  = FIRST_ONYX_WRITE.out.funnel_logs
+        .mix(S3_UPLOAD.out.funnel_logs, FINAL_ONYX_UPDATE.out.funnel_logs)
 
-    //     CLASPAR_ANALYSIS.out.analysis_json_sylph,
-    //     CLASPAR_ANALYSIS.out.upload_files_sylph
-    // )
-
-    // PUBLISH_ONYX(
-    //     climb_id,
-    //     server,
-    //     QC_FUNNEL.out.analysis_id_file,
-    //     CLASPAR_FUNNEL.out.viralign_analysis_id,
-    //     CLASPAR_FUNNEL.out.kraken_analysis_id,
-    //     CLASPAR_FUNNEL.out.sylph_analysis_id
-    // )
-
-
-    // CLASPAR
-    // CLASPAR_VIRALIGN_UPLOAD_PREP(sample_ch, "CLASPAR_VA", analysis_json_viralign)
-    // CLASPAR_KRAKEN_UPLOAD_PREP(sample_ch, "CLASPAR_KRAKEN", analysis_json_kraken)
-    // CLASPAR_SYLPH_UPLOAD_PREP(sample_ch, "CLASPAR_SYLPH", analysis_json_sylph)
-
-    // // ClasPar: viral aligner
-    // FOW__CLASPAR_VIRALIGN(sample_ch, "CLASPAR_VA", viralign_analysis_json, server, bucket)
-    // S3U__CLASPAR_VIRALIGN(sample_ch, "CLASPAR_VA", server, bucket, FOW__CLASPAR_VIRALIGN.out.temp_analysis_id_file, viralign_upload_files)
-    // FOU__CLASPAR_VIRALIGN(sample_ch, "CLASPAR_VA", viralign_analysis_json, server, bucket, FOW__CLASPAR_VIRALIGN.out.temp_analysis_id_file, S3U__CLASPAR_VIRALIGN.out.s3_location_json)
-
-    // // ClasPar: kraken
-    // FOW__CLASPAR_KRAKEN(sample_ch, "CLASPAR_KRAKEN", kraken_analysis_json, server, bucket)
-    // S3U__CLASPAR_KRAKEN(sample_ch, "CLASPAR_KRAKEN", server, bucket, FOW__CLASPAR_KRAKEN.out.temp_analysis_id_file, kraken_upload_files)
-    // FOU__CLASPAR_KRAKEN(sample_ch, "CLASPAR_KRAKEN", kraken_analysis_json, server, bucket, FOW__CLASPAR_KRAKEN.out.temp_analysis_id_file, S3U__CLASPAR_KRAKEN.out.s3_location_json)
-
-    // // ClasPar: sylph
-    // FOW__CLASPAR_SYLPH(sample_ch, "CLASPAR_SYLPH", sylph_analysis_json, server, bucket)
-    // S3U__CLASPAR_SYLPH(sample_ch, "CLASPAR_SYLPH", server, bucket, FOW__CLASPAR_SYLPH.out.temp_analysis_id_file, sylph_upload_files)
-    // FOU__CLASPAR_SYLPH(sample_ch, "CLASPAR_SYLPH", sylph_analysis_json, server, bucket, FOW__CLASPAR_SYLPH.out.temp_analysis_id_file, S3U__CLASPAR_SYLPH.out.s3_location_json)
-
-    // // Unclassified QC
-    // FOW__UNCLASS_QC(sample_ch, "UNCLASS_QC", unclass_qc_analysis_json, server, bucket)
-    // S3U__UNCLASS_QC(sample_ch, "UNCLASS_QC", server, bucket, FOW__UNCLASS_QC.out.temp_analysis_id_file, unclass_qc_upload_files)
-    // FOU__UNCLASS_QC(sample_ch, "UNCLASS_QC", unclass_qc_analysis_json, server, bucket, FOW__UNCLASS_QC.out.temp_analysis_id_file, S3U__UNCLASS_QC.out.s3_location_json)
-
-    // // Publish once every analysis has been written to Onyx and S3.
-    // PUBLISH_ONYX(
-    //     sample_ch,
-    //     server,
-    //     FOU__QC.out.analysis_id_file,
-    //     // FOU__CLASPAR_VIRALIGN.out.analysis_id_file,
-    //     // FOU__CLASPAR_KRAKEN.out.analysis_id_file,
-    //     // FOU__CLASPAR_SYLPH.out.analysis_id_file,
-    //     // FOU__UNCLASS_QC.out.analysis_id_file,
-    // )
-
-    // emit:
-    // publish_logs = PUBLISH_ONYX.out.publish_logs
-    // funnel_logs  = FOW__QC.out.funnel_logs
-    //     .mix(S3U__QC.out.funnel_logs, FOU__QC.out.funnel_logs)
-    //     // .mix(FOW__CLASPAR_VIRALIGN.out.funnel_logs, S3U__CLASPAR_VIRALIGN.out.funnel_logs, FOU__CLASPAR_VIRALIGN.out.funnel_logs)
-    //     // .mix(FOW__CLASPAR_KRAKEN.out.funnel_logs, S3U__CLASPAR_KRAKEN.out.funnel_logs, FOU__CLASPAR_KRAKEN.out.funnel_logs)
-    //     // .mix(FOW__CLASPAR_SYLPH.out.funnel_logs, S3U__CLASPAR_SYLPH.out.funnel_logs, FOU__CLASPAR_SYLPH.out.funnel_logs)
-    //     // .mix(S3U__UNCLASS_QC.out.funnel_logs, FOU__UNCLASS_QC.out.funnel_logs)
 }
