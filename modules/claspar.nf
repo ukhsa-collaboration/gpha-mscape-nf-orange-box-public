@@ -36,6 +36,6 @@ process CLASPAR {
 
     script:
     """
-    claspar -i $sample_ch.climb_id -o . -s $params.server -p $params.profiles_json -d $params.taxaplease
+    claspar -i $sample_ch.climb_id -o . -s $params.server -p $params.profiles_json -d $params.taxaplease_db
     """
 }
