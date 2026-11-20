@@ -27,7 +27,7 @@ process QC_SAMPLE {
     val sample_ch
 
     output:
-    val ${sample_ch.climb_id}, emit: qc_climb_id
+    val "${sample_ch.climb_id}", emit: qc_climb_id
     path "${sample_ch.climb_id}.QC.analysis_fields.json", emit: analysis_json
     path "${sample_ch.climb_id}_qc_results.json", emit: upload_files, optional: true
     path "${sample_ch.climb_id}_qc_metrics_log.txt", emit: logs
