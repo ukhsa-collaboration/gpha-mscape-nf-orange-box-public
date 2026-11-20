@@ -1,4 +1,4 @@
-include { QC_MERTICS_ONYX_UPLOAD }              from "../subworkflows/qc_metrics.nf"
+include { QC_METRICS_ONYX_UPLOAD }              from "../subworkflows/qc_metrics.nf"
 
 workflow ONYX_UPLOAD {
 
