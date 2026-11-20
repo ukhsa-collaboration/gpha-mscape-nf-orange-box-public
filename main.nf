@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-include { ORANGE_BOX   } from "./workflows/orange_box_analyses"
+include { ORANGE_BOX_ANALYSES   } from "./workflows/orange_box_analyses"
 include { ONYX_UPLOADS } from "./workflows/onyx_uploads"
 
 
@@ -19,26 +19,15 @@ workflow {
 
     sample_ch.view
 
-    ORANGE_BOX(sample_ch, params.outdir, params.server, params.bucket, params.profiles_json, params.taxaplease_db)
-
-    if (params.skip_onyx_upload) {
-        log.info "skip_onyx_upload is set: Analysis results will not be written to Onyx or uploaded to S3."
-    }
-    else {
-        ONYX_UPLOADS(
-            sample_ch,
-            server,
-            bucket,
-            QC_SAMPLE.out.analysis_json,
-            QC_SAMPLE.out.upload_files,
-            CLASPAR.out.analysis_json_viralign,
-            CLASPAR.out.upload_files_viralign,
-            CLASPAR.out.analysis_json_kraken,
-            CLASPAR.out.upload_files_kraken,
-            CLASPAR.out.analysis_json_sylph,
-            CLASPAR.out.upload_files_sylph,
-            UNCLASSIFIED_QC_ANALYSIS.out.analysis_json,
-            UNCLASSIFIED_QC_ANALYSIS.out.upload_files
-        )
-    }
+    ORANGE_BOX_ANALYSES(sample_ch, params.outdir, params.server, params.bucket, params.profiles_json, params.taxaplease_db)
+    if (params.onyx_upload) {
+            ch_results = Channel.empty().mix(
+                ANALYSIS.out.qc,
+                // ANALYSIS.out.kraken,
+                // ANALYSIS.out.viralign,
+                // ANALYSIS.out.sylph,
+                // ANALYSIS.out.unclassified
+            )
+            ONYX_UPLOADS(ch_results)
+        }
 }
