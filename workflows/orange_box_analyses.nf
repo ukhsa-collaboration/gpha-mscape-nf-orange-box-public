@@ -22,11 +22,11 @@ workflow ORANGE_BOX_ANALYSES {
         results = channel.empty().mix(
             QC_METRICS.out.results
                 .map { meta, json, files -> tuple(meta, 'QC', json, files) },
-            CLASPAR.out.viralign
+            CLASPAR_ANALYSIS.out.viralign
                 .map { meta, json, csv -> tuple(meta, 'CLASPAR_VA', json, csv) },
-            CLASPAR.out.kraken
+            CLASPAR_ANALYSIS.out.kraken
                 .map { meta, json, genera, species -> tuple(meta, 'CLASPAR_KRAKEN', json, [genera, species]) },
-            CLASPAR.out.sylph
+            CLASPAR_ANALYSIS.out.sylph
                 .map { meta, json, csv -> tuple(meta, 'CLASPAR_SYLPH', json, csv) },
             // // UNCLASSIFIED_QC_ANALYSIS.out.results
             //     .map { meta, json, files -> tuple(meta, 'UNCLASS_QC', json, files) },
