@@ -14,7 +14,7 @@ process FASTQ_READ_STATS {
                 - *.stats: one statistics table per input fastq
     */
     label "process_low"
-    tag "${meta.climb_id}:UNCLASS_QC"
+    tag "${meta.climb_id}"
 
     // change to the gpha-mscape-fastq-read-stats container
     container "ghcr.io/ukhsa-collaboration/gpha-mscape-fastq-read-stats:1.0.0"
@@ -68,7 +68,7 @@ process CREATE_READQC_ONYX_JSON {
 
     container 'ghcr.io/ukhsa-collaboration/gpha-mscape-fastq-read-stats:latest'
     label "process_low"
-    tag "${meta.climb_id}:UNCLASS_QC"
+    tag "${meta.climb_id}"
     publishDir "${params.outdir}/${meta.climb_id}_unclassified_qc", mode: 'copy'
 
     input:
