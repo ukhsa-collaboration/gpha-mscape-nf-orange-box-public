@@ -5,31 +5,24 @@ include { ONYX_UPLOAD         } from "./workflows/onyx_upload"
 
 
 workflow {
-    if (params.samplesheet){
-        samplesheet_ch = channel.fromPath(params.samplesheet)
-        sample_ch = samplesheet_ch.splitCsv(header: true, quote: '\"')
-            .map { row -> row }   // whole row is the meta map
+    if (!params.samplesheet){
+        error "Please specify a --samplesheet"
     }
-    else{
-        exit(1, "Please specify a --samplesheet")
-    }
-    if (!params.skip_onyx_upload && !params.bucket){
-        exit(1, "Please specify a --bucket, or pass --skip_onyx_upload to run without Onyx/S3 uploads")
+    if (params.onyx_upload && !params.bucket){
+        error "Please specify a --bucket when running with --onyx_upload"
     }
 
-    sample_ch.view()
+    // One item per samplesheet row; the whole row is the meta map (meta.climb_id etc.)
+    sample_ch = channel.fromPath(params.samplesheet)
+        .splitCsv(header: true, quote: '"')
 
+    sample_ch.view() // For testing
+
+    // Analyses
     ORANGE_BOX_ANALYSES(sample_ch)
-    // if (params.onyx_upload) {
-    //         ch_results = Channel.empty().mix(
-    //             ORANGE_BOX_ANALYSES.out.sample_ch,
-    //             ORANGE_BOX_ANALYSES.out.qc_metrics_analysis_json,
-    //             ORANGE_BOX_ANALYSES.out.qc_metrics_upload_files,
-    //             // ANALYSIS.out.kraken,
-    //             // ANALYSIS.out.viralign,
-    //             // ANALYSIS.out.sylph,
-    //             // ANALYSIS.out.unclassified
-    //         )
-    //         ONYX_UPLOAD(ch_results)
-    //     }
+
+    // Onyx uploads
+    if (params.onyx_upload){
+        ONYX_UPLOAD(ORANGE_BOX_ANALYSES.out.results)
+    }
 }
