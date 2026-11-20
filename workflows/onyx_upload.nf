@@ -6,7 +6,7 @@ workflow ONYX_UPLOAD {
     sample_ch
     // QC_SAMPLE outputs
     qc_analysis_json
-    // qc_upload_files
+    qc_metrics_upload_files
 
     // // CLASPAR outputs
     // viralign_analysis_json
@@ -22,7 +22,7 @@ workflow ONYX_UPLOAD {
 
     main:
     // QC METRICS
-    QC_METRICS_UPLOAD_PREP(sample_ch, "QC", qc_analysis_json)
+    QC_METRICS_UPLOAD_PREP(sample_ch, "QC", qc_metrics_analysis_json, qc_metrics_upload_files)
 
     // CLASPAR
     // CLASPAR_VIRALIGN_UPLOAD_PREP(sample_ch, "CLASPAR_VA", analysis_json_viralign)
