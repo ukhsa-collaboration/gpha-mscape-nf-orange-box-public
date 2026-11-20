@@ -4,27 +4,27 @@ process FASTQ_READ_STATS {
         read metrics such as phred score and gc content for each read, which are stored as an output table.
 
         Inputs:
-            - climb_id: Climb ID for a given sample
-            - fastq_files: unclassified read QC fastq files
+            - meta: samplesheet row for the sample (meta.climb_id is used for naming)
+            - reads: unclassified read fastq file(s), one for single-end or two for paired-end
             - output_dir: Directory to write results to
 
         Outputs:
-            - exit_code: Exit status for the program.
-            - result_file: Path to the output statistics table.
-            - readQC_complete.txt: Path to the file reporting process success.
+            - readQC: tuple(meta, readQC_complete.txt, *.stats)
+                - readQC_complete.txt: "True" if every fastq_read_stats.py run succeeded, else "False"
+                - *.stats: one statistics table per input fastq
     */
     label "process_low"
-    tag "${ch_meta.climb_id}"
+    tag "${meta.climb_id}:UC_READ_STATS"
 
     // change to the gpha-mscape-fastq-read-stats container
     container "ghcr.io/ukhsa-collaboration/gpha-mscape-fastq-read-stats:1.0.0"
-    publishDir "${params.outdir}/${ch_meta.climb_id}", mode: 'copy'
+    publishDir "${params.outdir}/${meta.climb_id}_unclassified_qc", mode: 'copy'
 
     input:
-    tuple val(ch_meta), path(reads)
+    tuple val(meta), path(reads)
 
     output:
-    tuple val(ch_meta), path("readQC_complete.txt"), path("*.stats"), emit: readQC
+    tuple val(meta), path("readQC_complete.txt"), path("*.stats"), emit: readQC
 
     script:
     def read_list = reads instanceof List ? reads : [reads]
@@ -57,34 +57,32 @@ process CREATE_READQC_ONYX_JSON {
         Creates the analysis json file and calculates some summary statistics across the unclassified read fraction.
 
         Inputs:
-            - climb_id: Climb ID for a given sample
-            - readQC_status: Path to the file reporting process success
-            - csv: Path to the output statistics table.
-            - server: Server code is running on
+            - meta: samplesheet row for the sample (meta.climb_id is used for naming)
+            - qc_text: contents of readQC_complete.txt ("True" or "False")
+            - stats_list: statistics table(s) from FASTQ_READ_STATS
 
         Outputs:
-            - stats_summary: Analysis json containing unclassified QC stats summary for upload into onyx.
-            - log: Log file.
-            - stats_list: Path to csv containing the output statistics table.
+            - stats_summary: Analysis json for upload into Onyx.
+            - upload_files: tuple(log file, statistics table(s)) for S3 upload.
     */
 
     container 'ghcr.io/ukhsa-collaboration/gpha-mscape-fastq-read-stats:latest'
     label "process_low"
-    tag "${ch_meta.climb_id}"
-    publishDir "${params.outdir}", mode: 'copy'
+    tag "${ch_meta.climb_id}:QC_READQC_ONYX_JSON"
+    publishDir "${params.outdir}/${meta.climb_id}_unclassified_qc", mode: 'copy'
 
     input:
-    tuple val(ch_meta), val(qc_text), path(stats_list)
-    val server
+    tuple val(meta), val(qc_text), path(stats_list)
 
     output:
-    path("${ch_meta.climb_id}.unclassified_readQC.analysis_fields.json"), emit: stats_summary
-    tuple path("${ch_meta.climb_id}.unclassified.readQC.analysis_fields.log.txt"), path(stats_list), emit: upload_files
+    path("${meta.climb_id}.unclassified_readQC.analysis_fields.json"), emit: stats_summary
+    tuple path("${meta.climb_id}.unclassified.readQC.analysis_fields.log.txt"), path(stats_list), emit: upload_files
+
     script:
     """
     create_onyx_json \\
-        -i ${ch_meta.climb_id} \\
-        -s ${server} \\
+        -i ${meta.climb_id} \\
+        -s ${params.server} \\
         -o . \\
         -p "${workflow.manifest.name}, ${workflow.manifest.version}, ${workflow.manifest.homePage}" \\
         -f ${stats_list} \\
@@ -93,7 +91,7 @@ process CREATE_READQC_ONYX_JSON {
 
     stub:
     """
-    echo '{}' > ${ch_meta.climb_id}.unclassified_readQC.analysis_fields.json
-    touch ${ch_meta.climb_id}.unclassified.readQC.analysis_fields.log.txt
+    echo '{}' > ${meta.climb_id}.unclassified_readQC.analysis_fields.json
+    touch ${meta.climb_id}.unclassified.readQC.analysis_fields.log.txt
     """
 }

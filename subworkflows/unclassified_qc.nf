@@ -5,19 +5,18 @@ include { CREATE_READQC_ONYX_JSON } from "../modules/unclassified_qc.nf"
 workflow UNCLASSIFIED_QC_ANALYSIS {
 
     take:
-    ch_meta // one samplesheet row per item, used as the meta map
-    server
+    sample_ch // one samplesheet row per item, used as the meta map
 
     main:
 
-    ch_reads = ch_meta
+    ch_reads = sample_ch
         .map { ch_meta ->
-            def reads = [ch_meta.unclassified_reads_1, ch_meta.unclassified_reads_2]
+            def reads = [sample_ch.unclassified_reads_1, sample_ch.unclassified_reads_2]
                 .findAll { it }
                 .collect { file(it) }
-            tuple(ch_meta, reads)
+            tuple(sample_ch, reads)
         }
-        .filter { ch_meta, reads -> reads }
+        .filter { sample_ch, reads -> reads }
 
     ch_reads.view()
 
@@ -32,6 +31,7 @@ workflow UNCLASSIFIED_QC_ANALYSIS {
     CREATE_READQC_ONYX_JSON(ch_readqc, server)
 
     emit:
-    analysis_json = CREATE_READQC_ONYX_JSON.out.stats_summary
-    upload_files = CREATE_READQC_ONYX_JSON.out.upload_files
+    // tuple(meta, analysis_json, [log, stats...])
+    results = CREATE_READQC_ONYX_JSON.out.results
+        .map { meta, json, log, stats -> tuple(meta, json, [log] + [stats].flatten()) }
 }
