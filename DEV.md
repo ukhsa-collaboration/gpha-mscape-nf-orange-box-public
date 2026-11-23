@@ -85,6 +85,6 @@ These can the each be added to the `results` channel in the `orange_box_analyses
 ```
 
 ## Upload
-All uploads are performed only when all anlayses in the `orange_box_analyses` workflow are complete.
+All uploads are performed only when all analyses in the `orange_box_analyses` workflow are complete.
 
 If you are testing your analyses, you can pass the parameter `--onyx_upload False`. This will prevent the pipeline attempting an upload to Onyx on completion of the the `orange_box_analyses` workflow.
