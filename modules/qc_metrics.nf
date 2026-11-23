@@ -10,31 +10,36 @@ process QC_SAMPLE {
 
         Inputs:
             - climb_id: Climb ID for a given sample
-            - output_dir: Directory to write results to
-
         Outputs:
-            - exit_code: Exit status for the program.
-            - result_file: Path to the onyx analysis json file.
+            - analysis_json: Path to the onyx analysis json file.
+            - upload_files: Output files to be uploaded to s3
+            - logs: Log file for the component
+
+
     */
-    container 'ghcr.io/ukhsa-collaboration/gpha-mscape-sample-qc:0.2.2'
-    cpus 1
-    memory '1GB'
-    tag "${climb_id}"
-    publishDir "$params.outdir/qc_sample", mode: "copy"
+    container 'ghcr.io/ukhsa-collaboration/gpha-mscape-sample-qc:latest'
+    label "process_single"
+    tag "${meta.climb_id}"
+    publishDir "${params.outdir}/qc_sample", mode: "copy"
 
     input:
-    val climb_id
-    val qc_dir
-    val server
+    val meta
 
     output:
-    path "${climb_id}.QC.analysis_fields.json", emit: analysis_json
-    path "${climb_id}_qc_results.json", emit: upload_files, optional: true
-    path "${climb_id}_qc_metrics_log.txt", emit: logs
+    tuple val(meta), path("${meta.climb_id}.QC.analysis_fields.json"), emit: analysis_json
+    tuple val(meta), path("${meta.climb_id}_qc_results.json"), emit: upload_files, optional: true
+    path "${meta.climb_id}_qc_metrics_log.txt", emit: logs
 
     script:
     """
-    qc_sample -i $climb_id -o . -s $server --store-onyx
-    cp ${climb_id}_qc_metrics_analysis_fields.json  ${climb_id}.QC.analysis_fields.json
+    qc_sample -i $meta.climb_id -o . -s $params.server --store-onyx
+    cp ${meta.climb_id}_qc_metrics_analysis_fields.json  ${meta.climb_id}.QC.analysis_fields.json
+    """
+
+    stub:
+    """
+    echo '{}' > ${meta.climb_id}.QC.analysis_fields.json
+    echo '{}' > ${meta.climb_id}_qc_results.json
+    touch ${meta.climb_id}_qc_metrics_log.txt
     """
 }
