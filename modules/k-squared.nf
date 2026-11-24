@@ -50,7 +50,23 @@ process KRAKEN {
 }
 
 
-process KSQUARED {
+process SUMMARISE_KRAKEN {
+    /*
+        This process takes the results of a kraken run and extracts the
+        results for the taxa of interest and reformats them.
+
+        Inputs:
+            - meta: Sample metadata - climb id
+            - kraken_out: Kraken outfile
+            - kraken_report: Kraken report file
+            - scan_name: Taxonomic group of interest
+        Outputs:
+            - meta: Sample metadata
+            - *_taxa.txt:
+            - *_taxacounts.txt:
+            - *_lineages.txt:
+            - *_reclassifier_json:
+    */
     container 'ghcr.io/ukhsa-collaboration/gpha-mscape-onyx-analysis-helper:latest'
     label 'process_low'
     tag "${meta.climb_id}"
