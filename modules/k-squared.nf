@@ -83,13 +83,13 @@ process SUMMARISE_KRAKEN {
     """
     classify run-reclassification \\
     --sample-id ${meta.climb_id} \\
-    --fastq ${fastq} \\
+    --fastq ${meta.climb_id} \\
     --kraken_report ${kraken_report} \\
-    --kraken_results ${kraken_results} \\
+    --kraken_results ${kraken_out} \\
     --microbe ${scan_name} \\
-    --tp_database ${tp_database} \\
-    --ncbi_database ${ncbi_database} \\
-    --out_dir ${out_dir} \\
+    --tp_database ${params.taxaplease_db} \\
+    --ncbi_database ${params.ncbi_database} \\
+    --out_dir . \\
     --publish
     """
 
