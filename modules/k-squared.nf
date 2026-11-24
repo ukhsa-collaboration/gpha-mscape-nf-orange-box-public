@@ -92,4 +92,14 @@ process SUMMARISE_KRAKEN {
     --out_dir ${out_dir} \\
     --publish
     """
+
+    stub:
+    """
+    echo '{}' > ${meta.climb_id}.ksquared.${scan_name}.analysis_fields.json
+    touch ${meta.climb_id}_taxacounts.txt
+    touch ${meta.climb_id}_taxa.txt
+    touch ${meta.climb_id}_lineages.txt
+    touch ${meta.climb_id}_${scan_name}_reclassifier.kraken.json
+    """
+
 }
