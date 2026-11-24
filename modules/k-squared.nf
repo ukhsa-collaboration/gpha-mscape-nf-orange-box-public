@@ -39,6 +39,14 @@ process KRAKEN {
     --report ${meta.climb_id}_${scan_name}_kraken_report.txt \\
     ${input_cmd}
     """
+
+    stub:
+    def input_cmd = meta.single_end ? "${reads}" : "--paired ${reads[0]} ${reads[1]}"
+    """
+    echo ${input_cmd}
+    touch ${meta.climb_id}_${scan_name}_kraken_out.txt
+    touch ${meta.climb_id}_${scan_name}_kraken_report.txt
+    """
 }
 
 
