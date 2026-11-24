@@ -71,7 +71,7 @@ process SUMMARISE_KRAKEN {
     label 'process_low'
     tag "${meta.climb_id}"
     publishDir "${params.outdir}/ksquared_${scan_name}/", mode: 'copy'
-    
+
     input:
         tuple val(meta), path(kraken_report), path(kraken_out)
         val scan_name
