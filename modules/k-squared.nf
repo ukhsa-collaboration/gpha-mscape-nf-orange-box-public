@@ -7,15 +7,12 @@ process KRAKEN {
     publishDir "${params.outdir}/ksquared_${scan_name}/", mode: 'copy'
 
     input:
-        val climb_id
-        val run_id 
-        val fastq
+        tuple val(meta), path(reads)
         val scan_name
         val kraken_db
 
     output:
-        path "${fastq.getBaseName(1)}_${climb_id}_${scan_name}_kraken_results.txt", emit: kresults
-        path "${fastq.getBaseName(1)}_${climb_id}_${scan_name}_kraken_report.txt", emit: kreport
+       tuple val(meta), path ("${meta.climb_id}_${scan_name}_kraken_out.txt"), path("${meta.climb_id}_${scan_name}_kraken_report.txt"), emit: kraken_files
 
     script:
     """
