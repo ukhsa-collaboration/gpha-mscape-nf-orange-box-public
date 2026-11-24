@@ -11,6 +11,8 @@ workflow K_SQUARED {
     kraken_db
 
     main:
+    // Create channel for input to kraken process, handles
+    // paired or single end reads as input.
     ch_reads = sample_ch
         .map { meta ->
             r1 = meta.human_filtered_reads_1
