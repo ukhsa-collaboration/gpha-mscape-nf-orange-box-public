@@ -15,8 +15,13 @@ process KRAKEN {
        tuple val(meta), path ("${meta.climb_id}_${scan_name}_kraken_out.txt"), path("${meta.climb_id}_${scan_name}_kraken_report.txt"), emit: kraken_files
 
     script:
+    def input_cmd = meta.single_end ? "${reads}" : "--paired ${reads[0]} ${reads[1]}"
     """
-    kraken2 --db ${kraken_db} ${fastq} --output ${fastq.baseName}_${climb_id}_${scan_name}_kraken_results.txt --report ${fastq.baseName}_${climb_id}_${scan_name}_kraken_report.txt
+    kraken2 \\
+    --db ${kraken_db} \\
+    --output ${meta.climb_id}_${scan_name}_kraken_out.txt \\
+    --report ${meta.climb_id}_${scan_name}_kraken_report.txt \\
+    ${input_cmd}
     """
 }
 
