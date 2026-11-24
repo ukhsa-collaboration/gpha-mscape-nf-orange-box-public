@@ -1,6 +1,22 @@
 #!/usr/bin/env nextflow
 
 process KRAKEN {
+    /*
+        This process takes a sample fastq(s) and runs kraken against the
+        reads using the specified reference database.
+
+        Inputs:
+            - meta: Sample metadata - climb id and bool of whether reads
+              are single or paired end
+            - reads: Path to read(s) - one path if single end, two paths
+              if paired end
+            - scan_name: Taxonomic group of interest
+            - kraken_db: Path to kraken_db
+        Outputs:
+            - meta: Sample metadata
+            - kraken_out: Kraken outfile
+            - kraken_report: Kraken report file
+    */
     container 'quay.io/biocontainers/kraken2:2.17--pl5321h077b44d_0'
     label 'process_medium'
     tag "${meta.climb_id}"
