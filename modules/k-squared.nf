@@ -57,21 +57,11 @@ process KSQUARED {
     publishDir "${params.outdir}/ksquared_${scan_name}/", mode: 'copy'
     
     input:
-        val sample_id
-        path fastq
-        path kraken_report
-        path kraken_results
-        val microbe
-        val tp_database
-        val ncbi_database
-        val out_dir
+        tuple val(meta), path(kraken_report), path(kraken_out)
+        val scan_name
 
     output:
-        // file "data.json"
-        path "${climbid}_taxacounts.txt", emit: taxacounts
-        path "${climbid}_taxa.txt"
-        path "${climbid}_lineages.txt", emit: lineages
-        path "${climbid}_viral_reclassifier.kraken.json", emit: json
+        tuple val(meta), path("${meta.climb_id}_taxacounts.txt"), path("${meta.climb_id}_taxa.txt"), path("${meta.climb_id}_lineages.txt"), path("${meta.climb_id}_${scan_name}_reclassifier.kraken.json"), emit: results
 
     script:
     """
