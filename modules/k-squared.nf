@@ -82,7 +82,7 @@ process SUMMARISE_KRAKEN {
     script:
     """
     classify run-reclassification \\
-    --sample-id ${sample_id} \\
+    --sample-id ${meta.climb_id} \\
     --fastq ${fastq} \\
     --kraken_report ${kraken_report} \\
     --kraken_results ${kraken_results} \\
