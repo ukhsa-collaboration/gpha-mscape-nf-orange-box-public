@@ -3,8 +3,9 @@
 process KRAKEN {
     container 'quay.io/biocontainers/kraken2:2.17--pl5321h077b44d_0'
     label 'process_medium'
-    publishDir "results", mode: 'copy'
-    
+    tag "${meta.climb_id}"
+    publishDir "${params.outdir}/ksquared_${scan_name}/", mode: 'copy'
+
     input:
         val climb_id
         val run_id 
@@ -24,8 +25,10 @@ process KRAKEN {
 
 
 process KSQUARED {
-    container ''
-    publishDir "results", mode: 'copy'
+    container 'ghcr.io/ukhsa-collaboration/gpha-mscape-onyx-analysis-helper:latest'
+    label 'process_low'
+    tag "${meta.climb_id}"
+    publishDir "${params.outdir}/ksquared_${scan_name}/", mode: 'copy'
     
     input:
         val sample_id
