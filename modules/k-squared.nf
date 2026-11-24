@@ -81,15 +81,15 @@ process SUMMARISE_KRAKEN {
 
     script:
     """
-    classify run-reclassification \
-    --sample-id ${sample_id} \
-    --fastq ${fastq} \
-    --kraken_report ${kraken_report} \
-    --kraken_results ${kraken_results} \
-    --microbbe ${microbe} \
-    --tp_database ${tp_database} \
-    --ncbi_database ${ncbi_database} \
-    --out_dir ${out_dir} \
+    classify run-reclassification \\
+    --sample-id ${sample_id} \\
+    --fastq ${fastq} \\
+    --kraken_report ${kraken_report} \\
+    --kraken_results ${kraken_results} \\
+    --microbe ${scan_name} \\
+    --tp_database ${tp_database} \\
+    --ncbi_database ${ncbi_database} \\
+    --out_dir ${out_dir} \\
     --publish
     """
 }
