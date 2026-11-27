@@ -83,7 +83,6 @@ process SUMMARISE_KRAKEN {
     """
     classify run-reclassification \\
     --sample-id ${meta.climb_id} \\
-    --fastq ${meta.climb_id} \\
     --kraken_report ${kraken_report} \\
     --kraken_results ${kraken_out} \\
     --microbe ${scan_name} \\
