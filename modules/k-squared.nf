@@ -87,7 +87,7 @@ process SUMMARISE_KRAKEN {
     --results ${kraken_out} \\
     --microbe ${scan_name} \\
     --tp-database ${params.taxaplease_db} \\
-    --ncbi-database ${params.ncbi_database} \\
+    --ncbi-database ${kraken_db}/taxonomy/ \\
     --out-dir . \\
     --server params.server
     """
