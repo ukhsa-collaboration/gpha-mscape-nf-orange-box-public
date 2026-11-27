@@ -90,7 +90,7 @@ process SUMMARISE_KRAKEN {
     --tp-database ${params.taxaplease_db} \\
     --ncbi-database ${kraken_db}/taxonomy/ \\
     --out-dir . \\
-    --server params.server
+    --server ${params.server}
     """
 
     stub:
