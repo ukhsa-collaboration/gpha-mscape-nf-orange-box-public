@@ -75,6 +75,7 @@ process SUMMARISE_KRAKEN {
     input:
         tuple val(meta), path(kraken_report), path(kraken_out)
         val scan_name
+        val kraken_db
 
     output:
         tuple val(meta), path("${meta.climb_id}_taxacounts.txt"), path("${meta.climb_id}_taxa.txt"), path("${meta.climb_id}_lineages.txt"), path("${meta.climb_id}_${scan_name}_reclassifier.kraken.json"), emit: results

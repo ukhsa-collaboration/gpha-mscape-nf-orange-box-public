@@ -22,7 +22,7 @@ workflow K_SQUARED {
             r2.toString()=='' ? [meta, [r1]] : [meta, [r1, r2]]
          }
     KRAKEN(ch_reads, scan_name, kraken_db)
-    SUMMARISE_KRAKEN(KRAKEN.out.kraken_files, scan_name)
+    SUMMARISE_KRAKEN(KRAKEN.out.kraken_files, scan_name, kraken_db)
 
     emit:
     results = SUMMARISE_KRAKEN.out.results
