@@ -1,8 +1,9 @@
 
-include { QC_METRICS               } from "../subworkflows/qc_metrics.nf"
-include { CLASPAR_ANALYSIS         } from "../subworkflows/claspar.nf"
-include { UNCLASSIFIED_QC_ANALYSIS } from "../subworkflows/unclassified_qc.nf"
-
+include { QC_METRICS                   } from "../subworkflows/qc_metrics.nf"
+include { CLASPAR_ANALYSIS             } from "../subworkflows/claspar.nf"
+include { UNCLASSIFIED_QC_ANALYSIS     } from "../subworkflows/unclassified_qc.nf"
+include { K_SQUARED as K_SQUARED_VIRUS } from "../subworkflows/k_squared.nf"
+include { K_SQUARED as K_SQUARED_FUNGI } from "../subworkflows/k_squared.nf"
 
 workflow ORANGE_BOX_ANALYSES {
 
@@ -14,6 +15,8 @@ workflow ORANGE_BOX_ANALYSES {
         QC_METRICS(sample_ch)
         CLASPAR_ANALYSIS(sample_ch)
         UNCLASSIFIED_QC_ANALYSIS(sample_ch)
+        K_SQUARED_VIRUS(sample_ch, "virus", params.k2_virus_db)
+        K_SQUARED_FUNGI(sample_ch, "fungi", params.k2_fungi_db)
 
         // Every analysis is reshaped to the same contract so ONYX_UPLOAD can treat them identically:
         //   tuple(meta, analysis_name, analysis_json, upload_files)
